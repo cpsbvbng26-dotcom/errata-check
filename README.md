@@ -146,6 +146,19 @@ python3 tests/check_tool.py     # 16 項目
   切り取られていないかは見ません
 - `[[number]]` は任意のコマンドを実行します。**信用できる宣言だけを走らせてください**
 
+## 引用
+
+Zenodo にアーカイブして DOI を付ける準備をしています。付き次第、ここに書きます。
+それまでは、このリポジトリの URL とコミットのハッシュで指してください。
+
+```
+Takuya Nemoto (2026). errata-check: Deterministic auditing of errata against
+frozen published artifacts (v0.1.0).
+https://github.com/cpsbvbng26-dotcom/errata-check
+```
+
+引用のための情報は [`CITATION.cff`](CITATION.cff) にもあります。
+
 ## ライセンス
 
 [MIT](LICENSE)。© 2026 根本卓哉（Takuya Nemoto）
