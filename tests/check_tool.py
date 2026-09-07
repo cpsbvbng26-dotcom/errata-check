@@ -379,6 +379,25 @@ try:
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 
+print("\n8. 自分で名乗っている「壊す先の数」が、実際の数と合っている")
+
+# この道具の主張は「散文に書いた数は機械で確かめられる」である。
+# その主張は、この道具自身の散文にも掛かる。掛けなければ、ここが最初にずれる。
+SELF = io.open(os.path.abspath(__file__), encoding="utf-8").read()
+BREAKS = (len(re.findall(r"^\s*case\(", SELF, re.M))
+          + len(re.findall(r"^disc_case\(", SELF, re.M)))
+
+for rel, pattern in [("README.md", r"壊す先は (\d+) 通り"),
+                     ("CITATION.cff", r"(\d+) 通りに壊して"),
+                     (".zenodo.json", r"breaking it in (\d+) distinct ways")]:
+    text = io.open(os.path.join(ROOT, rel), encoding="utf-8").read()
+    m = re.search(pattern, text)
+    check("%s が名乗る数が実際と合う" % rel,
+          m is not None and int(m.group(1)) == BREAKS,
+          ("名乗り %s / 実際 %d" % (m.group(1), BREAKS)) if m
+          else "名乗っている箇所が見つからない")
+
+
 print("\n" + "-" * 58)
 if failures:
     print("%d 件が通り、%d 件が通りませんでした。" % (passed, len(failures)))
