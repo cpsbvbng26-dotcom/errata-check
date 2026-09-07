@@ -2,7 +2,7 @@
 
 [![検査](https://github.com/cpsbvbng26-dotcom/errata-check/actions/workflows/verify.yml/badge.svg)](https://github.com/cpsbvbng26-dotcom/errata-check/actions/workflows/verify.yml)
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22649054.svg)](https://doi.org/10.5281/zenodo.22649054)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22649899.svg)](https://doi.org/10.5281/zenodo.22649899)
 
 **凍結された公開物に対して、正誤表のほうを機械で監査する。**
 
@@ -236,11 +236,17 @@ ORCID を一桁変える、ISBN を一桁変える、内訳の和を崩す、和
 
 ## 引用
 
-Zenodo にアーカイブされ、DOI が付与されています。
+Zenodo にアーカイブされ、DOI が付与されています。**版ごとに DOI が違います。**
+使った版の番号を書いてください。
+
+| 版 | DOI |
+| --- | --- |
+| v0.2.0（いまの版） | [10.5281/zenodo.22649899](https://doi.org/10.5281/zenodo.22649899) |
+| v0.1.0 | [10.5281/zenodo.22649054](https://doi.org/10.5281/zenodo.22649054) |
 
 > 根本卓哉 (2026). *errata-check: Deterministic auditing of errata against frozen
-> published artifacts / 凍結された公開物に対する、決定的な正誤表の監査* (v0.1.0).
-> Zenodo. https://doi.org/10.5281/zenodo.22649054
+> published artifacts / 凍結された公開物に対する、決定的な正誤表の監査* (v0.2.0).
+> Zenodo. https://doi.org/10.5281/zenodo.22649899
 
 ```bibtex
 @software{nemoto_errata_check_2026,
@@ -248,10 +254,10 @@ Zenodo にアーカイブされ、DOI が付与されています。
   title        = {{errata-check: Deterministic auditing of errata
                    against frozen published artifacts}},
   year         = {2026},
-  version      = {v0.1.0},
+  version      = {v0.2.0},
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.22649054},
-  url          = {https://doi.org/10.5281/zenodo.22649054}
+  doi          = {10.5281/zenodo.22649899},
+  url          = {https://doi.org/10.5281/zenodo.22649899}
 }
 ```
 
