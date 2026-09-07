@@ -1,0 +1,71 @@
+# errata-check の宣言の見本。
+#
+#     python3 errata_check.py examples/minimal/audit.toml
+#
+# 一次資料（paper.pdf）は凍結されている。直せるのは ERRATA.md のほうである。
+# この宣言は「ERRATA.md が paper.pdf からずれていないこと」を検査にする。
+
+[document]
+path = "ERRATA.md"
+
+[[source]]
+id = "paper"
+path = "paper.pdf"
+sha256 = "9e0f27cbcbc8d446e4161688b392ce48111568722766274b3980c263cf9f3796"
+
+# 数え落としを落とすため、件数も宣言する。
+# 「三箇所だと思っていたら六箇所だった」を止めるための欄である。
+[[count]]
+source = "paper"
+group = "promise"
+expect = 2
+
+# 「印字されている」と述べたものは、本当に印字されているか
+[[quote]]
+source = "paper"
+group = "promise"
+where = "本文"
+text = "We verified both cases computationally (script demo_verification.py, included with this submission)"
+
+[[quote]]
+source = "paper"
+group = "promise"
+where = "謝辞"
+text = "the verification script (demo_verification.py) is distributed together with this PDF"
+
+# 「印字されていない」と述べたものは、本当に無いか
+[[quote]]
+source = "paper"
+where = "改訂版の DOI"
+text = "10.5281/zenodo.00000002"
+present = false
+
+# 旧版の DOI は、確かに印字されている
+[[quote]]
+source = "paper"
+where = "参考文献"
+text = "DOI: 10.5281/zenodo.00000001"
+in_document = false      # 正誤表は前後を変えて引いているので、そちらは見ない
+
+# 同梱を謳われたファイルは、本当に無いか
+[[absent]]
+glob = "**/demo_verification.py"
+reason = "同梱を謳っているが存在しない"
+
+# 名乗る件数が、実際に走らせた結果と一致するか
+[[number]]
+label = "検査の件数"
+command = "python3 count.py"
+extract = "(\\d+) checks"
+pattern = "(\\d+) 項目の検査"
+
+# 解決しないと決めた項目が、こっそり解決済みに書き換わっていないか
+[[open_item]]
+id = "E1"
+heading_pattern = "^## E1 —"
+must_say = ["この項目は解決しません"]
+must_not_say = ["解決済み", "修正しました"]
+
+[dates]
+stamp_pattern = "最終更新: (\\d{4})年(\\d{1,2})月(\\d{1,2})日"
+any_pattern = "(\\d{4})年(\\d{1,2})月(\\d{1,2})日"

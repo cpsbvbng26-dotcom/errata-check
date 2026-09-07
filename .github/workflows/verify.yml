@@ -1,0 +1,29 @@
+name: 検査
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: 道具自身 16 項目 / 見本 19 項目
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install pypdf
+      - name: 道具自身（壊して落ちることまで見る）
+        run: python3 tests/check_tool.py
+      - name: 見本が通る
+        run: python3 errata_check.py examples/minimal/audit.toml
+      - name: 見本が作り直せる
+        run: |
+          python3 examples/minimal/build.py
+          git diff --exit-code -- examples/minimal

@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: この道具を使ったときは、次のように引用してください。
+title: "errata-check: 凍結された公開物に対する、決定的な正誤表の監査"
+abstract: >
+  DOI が付いて公開された成果物は改訂できない。改訂できるのは正誤表のほうであり、
+  したがって正誤表は時間とともに一次資料からずれていく。引用が変わり、箇所が
+  数え落とされ、未解決の項目が解決済みに書き換わり、最終更新の日付が古いまま残る。
+  この道具は、そのずれを継続的インテグレーションで落とす。正誤表が「印字されている」
+  と述べた文が一次資料に一字一句あるか、「印字されていない」と述べたものが本当に
+  無いか、宣言した件数だけ記述が挙がっているか、名乗る数値が実際に走らせた結果と
+  一致するか、解決しないと決めた項目がそのまま残っているか、一次資料そのものが
+  差し替わっていないか（SHA-256）、最終更新が本文のどの日付よりも古くないかを見る。
+  判定に推論を使わない。大規模言語モデルも類似度も用いず、一致するかしないかだけで
+  決めるため、出力を人が確かめ直す必要がない。既存の再現性の道具は原稿を作り直せる
+  ことを前提とするが、この道具は作り直せない成果物を対象とする。
+  道具自身の検査は、通る状態を一つずつ壊して、壊した箇所がちょうど落ちることを
+  確かめる形で書かれている。
+type: software
+authors:
+  - family-names: 根本
+    given-names: 卓哉
+    alias: Takuya Nemoto
+    orcid: "https://orcid.org/0009-0000-1406-0547"
+repository-code: "https://github.com/cpsbvbng26-dotcom/errata-check"
+license: MIT
+version: 0.1.0
+date-released: "2026-09-07"
+keywords:
+  - research integrity
+  - errata
+  - corrigendum
+  - post-publication
+  - reproducibility
+  - continuous integration
+  - self-correction
+  - deterministic verification
