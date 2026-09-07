@@ -8,7 +8,7 @@ on:
 
 jobs:
   verify:
-    name: 道具自身 16 項目 / 見本 19 項目
+    name: 道具自身 60 項目 / 見本 19 + 31 項目
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -21,9 +21,12 @@ jobs:
       - run: pip install pypdf
       - name: 道具自身（壊して落ちることまで見る）
         run: python3 tests/check_tool.py
-      - name: 見本が通る
+      - name: 見本が通る（最小）
         run: python3 errata_check.py examples/minimal/audit.toml
+      - name: 見本が通る（分野ごと）
+        run: python3 errata_check.py examples/disciplines/audit.toml
       - name: 見本が作り直せる
         run: |
           python3 examples/minimal/build.py
-          git diff --exit-code -- examples/minimal
+          python3 examples/disciplines/build.py
+          git diff --exit-code -- examples

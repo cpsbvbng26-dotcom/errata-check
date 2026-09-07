@@ -13,7 +13,13 @@ abstract: >
   判定に推論を使わない。大規模言語モデルも類似度も用いず、一致するかしないかだけで
   決めるため、出力を人が確かめ直す必要がない。既存の再現性の道具は原稿を作り直せる
   ことを前提とするが、この道具は作り直せない成果物を対象とする。
-  道具自身の検査は、通る状態を一つずつ壊して、壊した箇所がちょうど落ちることを
+  引用の一致だけを見るのではない。分野が違えば紙面から決定的に確かめられるものも
+  違うため、印字された検定統計量からの p の再計算（t・F・χ²・r。statcheck と同じ
+  考え方で、実装は独立。分布は公表されている数値表と突き合わせて確かめてある）、
+  整数の平均が標本数で到達可能かの判定（GRIM）、ORCID・ISBN・ISSN の検査数字、
+  印字された数どうしの算術的な関係、和暦と西暦の対応も宣言できる。
+  「この箇所は誤って印字されている」という指摘そのものを検査の対象にもできる。
+  道具自身の検査は、通る状態を二十通りに壊して、壊した箇所がちょうど落ちることを
   確かめる形で書かれている。
 type: software
 authors:
@@ -24,7 +30,7 @@ authors:
 repository-code: "https://github.com/cpsbvbng26-dotcom/errata-check"
 doi: 10.5281/zenodo.22649054
 license: MIT
-version: 0.1.0
+version: 0.2.0
 date-released: "2026-09-07"
 keywords:
   - research integrity
@@ -35,3 +41,6 @@ keywords:
   - continuous integration
   - self-correction
   - deterministic verification
+  - statistical reporting errors
+  - GRIM test
+  - checksum validation

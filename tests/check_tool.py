@@ -23,7 +23,8 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, HERE)
 
-from errata_check import digest  # noqa: E402
+from errata_check import (digest, p_value, grim_ok, checksum_ok,  # noqa: E402
+                          era_to_gregorian)
 from make_pdf import make  # noqa: E402
 
 passed, failures = 0, []
@@ -257,7 +258,116 @@ case("最終更新が本文の日付より古いと落ちる",
                     "最終更新: 2026年9月5日"),
      "古くない")
 
-print("\n3. 落ちないことも見る（偽陽性を出さない）")
+print("\n3. 分布を、公表されている数値表と突き合わせる")
+
+# 実装が正しいかどうかは、実装だけでは分からない。外の値と当たる。
+# 出典は標準的な統計数値表の 5% 点・1% 点。
+for label, got, want, tol in [
+    ("t(0.05, df=10) = 2.228", p_value("t", 2.228, [10]), 0.05, 5e-4),
+    ("t(0.01, df=10) = 3.169", p_value("t", 3.169, [10]), 0.01, 5e-4),
+    ("t(0.05, df=1) = 12.706", p_value("t", 12.706, [1]), 0.05, 5e-5),
+    ("t 片側は両側の半分", p_value("t", 2.228, [10], "one"), 0.025, 5e-4),
+    ("chi2(0.05, df=1) = 3.841", p_value("chi2", 3.841, [1]), 0.05, 5e-5),
+    ("chi2(0.05, df=10) = 18.307", p_value("chi2", 18.307, [10]), 0.05, 5e-5),
+    ("chi2(0.01, df=5) = 15.086", p_value("chi2", 15.086, [5]), 0.01, 5e-5),
+    ("F(0.05, 1, 10) = 4.965", p_value("F", 4.965, [1, 10]), 0.05, 5e-4),
+    ("F(0.05, 3, 20) = 3.098", p_value("F", 3.098, [3, 20]), 0.05, 5e-4),
+    ("F(0.01, 2, 30) = 5.390", p_value("F", 5.390, [2, 30]), 0.01, 5e-4),
+    ("r = 0.5, n = 30 → p ≈ .0049", p_value("r", 0.5, [30]), 0.00485, 5e-4),
+]:
+    check(label, abs(got - want) < tol, "計算 %.6f / 表 %.4f" % (got, want))
+
+print("\n4. GRIM・検査数字・元号を、手で分かる値で当たる")
+
+for mean, n, want in ((3.44, 25, True), (3.42, 25, False), (3.40, 25, True),
+                      (2.5, 4, True), (2.6, 4, False),
+                      (0.53, 15, True), (0.54, 15, False)):
+    check("GRIM  平均 %s / n = %d → %s" % (mean, n, "到達できる" if want else "できない"),
+          grim_ok(mean, n, len(str(mean).split(".")[1])) == want)
+
+for kind, value, want in (
+    ("orcid", "0009-0000-1406-0547", True),
+    ("orcid", "0009-0000-1406-0548", False),
+    ("orcid", "0000-0002-1825-0097", True),      # ORCID の公開例（X 以外）
+    ("isbn13", "978-0-13-235088-4", True),
+    ("isbn13", "978-0-13-235088-5", False),
+    ("isbn10", "0-306-40615-2", True),
+    ("isbn10", "0-306-40615-3", False),
+    ("issn", "0378-5955", True),
+    ("issn", "0378-5956", False),
+):
+    check("%s %s → %s" % (kind, value, "合う" if want else "合わない"),
+          checksum_ok(kind, value) == want)
+
+for text, want in (("昭和十八年", 1943), ("昭和二十年", 1945), ("令和元年", 2019),
+                   ("平成31年", 2019), ("明治元年", 1868), ("大正十五年", 1926),
+                   ("享保十年", None)):
+    check("元号  %s → %s" % (text, want), era_to_gregorian(text) == want,
+          "換算 %s" % era_to_gregorian(text))
+
+print("\n5. 分野ごとの見本を、一つずつ壊す")
+
+DISC = os.path.join(ROOT, "examples", "disciplines")
+
+
+def disc_case(label, mutate, expect):
+    tmp = tempfile.mkdtemp()
+    try:
+        dst = os.path.join(tmp, "disciplines")
+        shutil.copytree(DISC, dst)
+        mutate(dst)
+        r = subprocess.run([sys.executable, os.path.join(ROOT, "errata_check.py"),
+                            os.path.join(dst, "audit.toml")],
+                           capture_output=True, text=True)
+        bad = [ln.strip()[6:].strip() for ln in r.stdout.splitlines()
+               if ln.strip().startswith("FAIL")]
+        check(label, r.returncode == 1 and any(expect in b for b in bad),
+              ("落ちた: " + "; ".join(bad[:2])) if bad else "何も落ちなかった")
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+disc_case("印字された p を偽ると落ちる",
+          lambda d: edit(d, "audit.toml", 'reported = "p = .04"', 'reported = "p = .004"'),
+          "p が計算し直した値と合う")
+
+disc_case("自由度を偽ると落ちる",
+          lambda d: edit(d, "audit.toml", "df = [28]", "df = [8]"),
+          "p が計算し直した値と合う")
+
+disc_case("到達できない平均を到達できると宣言すると落ちる",
+          lambda d: edit(d, "audit.toml", "mean = 3.44", "mean = 3.42"),
+          "到達できる値である")
+
+disc_case("ORCID を一桁変えると落ちる",
+          lambda d: edit(d, "audit.toml", "0009-0000-1406-0547", "0009-0000-1406-0548"),
+          "検査数字が合っている")
+
+disc_case("ISBN を一桁変えると落ちる",
+          lambda d: edit(d, "audit.toml", "978-0-13-235088-4", "978-0-13-235088-5"),
+          "検査数字が合っている")
+
+disc_case("内訳の和が合わないと落ちる",
+          lambda d: edit(d, "audit.toml", "values = [112, 8]", "values = [112, 9]"),
+          "無作為化 120")
+
+disc_case("和暦と西暦の対応が違うと落ちる",
+          lambda d: edit(d, "audit.toml", "gregorian = 1943", "gregorian = 1944"),
+          "昭和十八年 = 1944 年")
+
+disc_case("平文の一次資料が差し替わっても落ちる",
+          lambda d: open(os.path.join(d, "record.md"), "a").write("\n追記\n"),
+          "record が差し替わっていない")
+
+print("\n6. 見本そのものが通る")
+for name in ("minimal", "disciplines"):
+    r = subprocess.run([sys.executable, os.path.join(ROOT, "errata_check.py"),
+                        os.path.join(ROOT, "examples", name, "audit.toml")],
+                       capture_output=True, text=True)
+    check("examples/%s が通る" % name, r.returncode == 0,
+          r.stdout.strip().splitlines()[-1] if r.stdout else "")
+
+print("\n7. 落ちないことも見る（偽陽性を出さない）")
 tmp = tempfile.mkdtemp()
 try:
     build(tmp)
