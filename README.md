@@ -1,5 +1,9 @@
 # errata-check
 
+[![検査](https://github.com/cpsbvbng26-dotcom/errata-check/actions/workflows/verify.yml/badge.svg)](https://github.com/cpsbvbng26-dotcom/errata-check/actions/workflows/verify.yml)
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22649054.svg)](https://doi.org/10.5281/zenodo.22649054)
+
 **凍結された公開物に対して、正誤表のほうを機械で監査する。**
 
 DOI が付いて公開された PDF は、もう直せません。直せるのは正誤表のほうです。
@@ -148,13 +152,23 @@ python3 tests/check_tool.py     # 16 項目
 
 ## 引用
 
-Zenodo にアーカイブして DOI を付ける準備をしています。付き次第、ここに書きます。
-それまでは、このリポジトリの URL とコミットのハッシュで指してください。
+Zenodo にアーカイブされ、DOI が付与されています。
 
-```
-Takuya Nemoto (2026). errata-check: Deterministic auditing of errata against
-frozen published artifacts (v0.1.0).
-https://github.com/cpsbvbng26-dotcom/errata-check
+> 根本卓哉 (2026). *errata-check: Deterministic auditing of errata against frozen
+> published artifacts / 凍結された公開物に対する、決定的な正誤表の監査* (v0.1.0).
+> Zenodo. https://doi.org/10.5281/zenodo.22649054
+
+```bibtex
+@software{nemoto_errata_check_2026,
+  author       = {Nemoto, Takuya},
+  title        = {{errata-check: Deterministic auditing of errata
+                   against frozen published artifacts}},
+  year         = {2026},
+  version      = {v0.1.0},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.22649054},
+  url          = {https://doi.org/10.5281/zenodo.22649054}
+}
 ```
 
 引用のための情報は [`CITATION.cff`](CITATION.cff) にもあります。
