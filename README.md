@@ -311,6 +311,29 @@ Zenodo にアーカイブされ、DOI が付与されています。**版ごと�
 
 引用のための情報は [`CITATION.cff`](CITATION.cff) にもあります。
 
+## AI の利用
+
+[![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-D97757?style=for-the-badge)](https://claude.com/claude-code)
+
+**この道具の実装は、Claude Code（Anthropic）を用いて書きました。**`errata_check.py`、
+`tests/check_tool.py`、`examples/`、README、`CITATION.cff` のいずれもそうです。
+
+**何を検査するかを決めたのは著者です。**「凍結された公開物に対して、正誤表のほうを
+決定的に監査する」という切り口、判定に推論を使わないという方針、宣言の書式、
+そして「通る状態を壊して、落ちることまで確かめる」という試験の作り方 ——
+これらは著者の判断です。
+
+**検査が報告する数値は、すべて実行して得たものです。**AI は著作者ではありません。
+いずれの主張についても、責任は著者（根本卓哉）にあります。
+
+**記録から確認できること。**このリポジトリのコミットは `Claude` 名義で、
+末尾に作業セッションを示す `Claude-Session:` トレーラが付いています。
+`git log --author=Claude` で辿れます。
+
+**Zenodo に登録した v0.1.0 と v0.2.0 のレコードには、この記載がありません。**
+公開後にファイルは差し替えられないため、直せるのはこちら側だけです
+（[self-correction](https://github.com/cpsbvbng26-dotcom/self-correction) の `TL-001`）。
+
 ## ライセンス
 
 [MIT](LICENSE)。© 2026 根本卓哉（Takuya Nemoto）
