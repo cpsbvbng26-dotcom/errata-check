@@ -586,6 +586,69 @@ class Audit:
                       got == int(e["gregorian"]),
                       "換算 %s" % got)
 
+    # ------------------------------------------------------ 参考文献の使い方
+    #
+    # 「読んだ」は内面であり、外から確かめられない。**「どの箇所が、どの主張を
+    # 支えているか」は公開された主張**であって、本を持っている人なら誰でも
+    # 反証できる。だから宣言させるのは読書ではなく、指し示しのほうである。
+    #
+    # ここで機械が見るのは、宣言と紙面の整合だけである。**その本が本当にそう
+    # 述べているかは見ない**（見られない）。見られないことを、見たふりにしない。
+
+    ROLES = ("直接支持", "用語の出所", "対立見解", "背景", "反例")
+
+    def check_references(self):
+        refs = self.spec.get("reference", [])
+        policy = self.spec.get("reference_policy") or {}
+        if not refs and not policy:
+            return
+
+        for r in refs:
+            key = r.get("key", "")
+            sid = r.get("source")
+            text = self._source_text(sid) if sid else self.document_text()
+            name = "参考文献「%s」" % key
+
+            self._add("参考文献", "%s が本文に現れる" % name,
+                      bool(key) and text is not None and normalize(key) in text)
+            self._add("参考文献", "%s に箇所（locus）がある" % name,
+                      bool(str(r.get("locus", "")).strip()),
+                      "「その本のどこか」は認めない")
+            self._add("参考文献", "%s が何を支えているか書いてある" % name,
+                      bool(str(r.get("supports", "")).strip()),
+                      "支えるものを言えないなら載せない")
+            self._add("参考文献", "%s の使い方が決めた語である" % name,
+                      r.get("role") in self.ROLES,
+                      "%s / 使えるのは %s" % (r.get("role"), "・".join(self.ROLES)))
+
+        # 本文に現れる引用が、すべて宣言されているか。
+        # 宣言し忘れた引用は「使ったが説明できないもの」であり、そこが漏れる。
+        pat = policy.get("pattern")
+        if not pat:
+            return
+        sid = policy.get("source")
+        text = self._source_text(sid) if sid else self.document_text()
+        if text is None:
+            return
+        found = set()
+        for m in re.finditer(pat, text):
+            found.add(normalize(m.group(1) if m.groups() else m.group(0)))
+        declared = set(normalize(r.get("key", "")) for r in refs)
+        for skip in policy.get("ignore", []):
+            found.discard(normalize(skip))
+
+        if policy.get("require_all", True):
+            missing = sorted(found - declared)
+            self._add("参考文献", "本文の引用がすべて宣言されている", not missing,
+                      ("宣言が無い: " + "、".join(missing[:6])) if missing
+                      else "%d 件" % len(found))
+
+        if policy.get("require_used", True):
+            unused = sorted(declared - found)
+            self._add("参考文献", "宣言した参考文献がすべて使われている", not unused,
+                      ("本文に無い: " + "、".join(unused[:6])) if unused
+                      else "%d 件" % len(declared))
+
     # -------------------------------------------------------- 未解決の項目
     def check_open_items(self):
         doc = self.document_text()
@@ -635,6 +698,7 @@ class Audit:
         self.check_identifiers()
         self.check_arithmetic()
         self.check_eras()
+        self.check_references()
         self.check_open_items()
         self.check_dates()
         return self.results

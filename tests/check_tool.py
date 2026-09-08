@@ -359,7 +359,7 @@ disc_case("平文の一次資料が差し替わっても落ちる",
           lambda d: open(os.path.join(d, "record.md"), "a").write("\n追記\n"),
           "record が差し替わっていない")
 
-print("\n6. 見本そのものが通る")
+print("\n7. 見本そのものが通る")
 for name in ("minimal", "disciplines"):
     r = subprocess.run([sys.executable, os.path.join(ROOT, "errata_check.py"),
                         os.path.join(ROOT, "examples", name, "audit.toml")],
@@ -367,7 +367,7 @@ for name in ("minimal", "disciplines"):
     check("examples/%s が通る" % name, r.returncode == 0,
           r.stdout.strip().splitlines()[-1] if r.stdout else "")
 
-print("\n7. 落ちないことも見る（偽陽性を出さない）")
+print("\n8. 落ちないことも見る（偽陽性を出さない）")
 tmp = tempfile.mkdtemp()
 try:
     build(tmp)
@@ -379,13 +379,62 @@ try:
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 
-print("\n8. 自分で名乗っている「壊す先の数」が、実際の数と合っている")
+print("\n6. 参考文献の見本を、一つずつ壊す")
+
+REFS = os.path.join(ROOT, "examples", "references")
+
+
+def ref_case(label, mutate, expect):
+    tmp = tempfile.mkdtemp()
+    try:
+        dst = os.path.join(tmp, "references")
+        shutil.copytree(REFS, dst)
+        mutate(dst)
+        r = subprocess.run([sys.executable, os.path.join(ROOT, "errata_check.py"),
+                            os.path.join(dst, "audit.toml")],
+                           capture_output=True, text=True)
+        bad = [ln.strip()[6:].strip() for ln in r.stdout.splitlines()
+               if ln.strip().startswith("FAIL")]
+        check(label, r.returncode == 1 and any(expect in b for b in bad),
+              ("落ちた: " + "; ".join(bad[:2])) if bad else "何も落ちなかった")
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+ref_case("箇所（locus）を消すと落ちる",
+         lambda d: edit(d, "audit.toml", 'locus = "§1067"', 'locus = ""'),
+         "箇所（locus）がある")
+
+ref_case("何を支えているか書かないと落ちる",
+         lambda d: edit(d, "audit.toml",
+                        'supports = "「力への意志」という語の出どころ。主張そのものは支えていない"',
+                        'supports = ""'),
+         "何を支えているか書いてある")
+
+ref_case("決めていない使い方を書くと落ちる",
+         lambda d: edit(d, "audit.toml", 'role = "対立見解"', 'role = "参考"'),
+         "使い方が決めた語である")
+
+# 本文は触らない。触ると sha256 の側が落ちて、見たい失敗が紛れる。
+# 宣言の側だけを動かす。
+
+ref_case("宣言し忘れた引用があると落ちる",
+         lambda d: edit(d, "audit.toml", 'key = "Foucault 1988"', 'key = "Rawls 1971"'),
+         "本文の引用がすべて宣言されている")
+
+ref_case("使っていない参考文献を宣言すると落ちる",
+         lambda d: edit(d, "audit.toml", 'key = "Foucault 1988"', 'key = "Rawls 1971"'),
+         "宣言した参考文献がすべて使われている")
+
+
+print("\n9. 自分で名乗っている「壊す先の数」が、実際の数と合っている")
 
 # この道具の主張は「散文に書いた数は機械で確かめられる」である。
 # その主張は、この道具自身の散文にも掛かる。掛けなければ、ここが最初にずれる。
 SELF = io.open(os.path.abspath(__file__), encoding="utf-8").read()
 BREAKS = (len(re.findall(r"^\s*case\(", SELF, re.M))
-          + len(re.findall(r"^disc_case\(", SELF, re.M)))
+          + len(re.findall(r"^disc_case\(", SELF, re.M))
+          + len(re.findall(r"^ref_case\(", SELF, re.M)))
 
 for rel, pattern in [("README.md", r"壊す先は (\d+) 通り"),
                      ("CITATION.cff", r"(\d+) 通りに壊して"),

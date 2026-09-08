@@ -1,0 +1,72 @@
+# 参考文献の使い方を宣言する。
+#
+# 「読んだ」とは書かせない。**内面は外から確かめられない**からである。
+# 書かせるのは「どの箇所が、どの主張を支えているか」で、これは公開された
+# 主張であり、その本を持っている人なら誰でも反証できる。
+#
+#     python3 errata_check.py examples/references/audit.toml
+#
+# 機械が見るのは、宣言と紙面の整合だけである。**その本が本当にそう述べて
+# いるかは見ない**（見られない）。見られないことを、見たふりにしない。
+
+[document]
+path = "essay.md"
+
+[[source]]
+id = "essay"
+path = "essay.md"
+sha256 = "7adcf491c97984b3632fce1739ec16243e9cf1111edaefd9f5735df9155c906c"
+
+# ------------------------------------------------------------ 使い方の宣言
+#
+# role は五つだけ。曖昧な「参考」を認めない。
+#
+#   直接支持    その主張を、その典拠が述べている
+#   用語の出所  語や概念の由来。主張の支えではない
+#   対立見解    反対の立場として引く
+#   背景        位置づけのため。主張は支えていない
+#   反例        自説に不利なものとして挙げる
+
+[[reference]]
+source = "essay"
+key = "Kant 1785"
+edition = "Grundlegung zur Metaphysik der Sitten (1785)"
+locus = "第二章、定言命法の定式"
+role = "直接支持"
+supports = "自己が法の作り手であると同時にその法に従う者でもある、という二重の位置"
+
+[[reference]]
+source = "essay"
+key = "Nietzsche 1967"
+edition = "The Will to Power, Kaufmann & Hollingdale trans., Vintage, 1967"
+locus = "§1067"
+role = "用語の出所"
+supports = "「力への意志」という語の出どころ。主張そのものは支えていない"
+caveat = "遺稿の編纂物であり、著者自身が公刊した順序ではない"
+
+[[reference]]
+source = "essay"
+key = "Junger 1932"
+edition = "Der Arbeiter (1932)"
+locus = "第一部、総動員の記述"
+role = "用語の出所"
+supports = "「動員」という語の来歴。自己の陶冶へ移すには翻案が要ることの根拠"
+
+[[reference]]
+source = "essay"
+key = "Foucault 1988"
+edition = "Technologies of the Self (1988)"
+locus = "冒頭の講義"
+role = "対立見解"
+supports = "自己の統治という比喩を、支配の語彙の再生産として退ける立場"
+
+# ---------------------------------------------------- 本文の側から見る規則
+#
+# 宣言し忘れた引用は「使ったが説明できないもの」である。そこが漏れる。
+# 逆に、本文で使っていない参考文献は、載せる理由が無い。
+
+[reference_policy]
+source = "essay"
+pattern = "\\(([^()]{2,60}?\\s\\d{4}[a-z]?)\\)"
+require_all = true
+require_used = true

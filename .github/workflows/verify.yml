@@ -8,7 +8,7 @@ on:
 
 jobs:
   verify:
-    name: 道具自身 63 項目 / 見本 19 + 31 項目
+    name: 道具自身 68 項目 / 見本 19 + 31 + 21 項目
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -25,8 +25,11 @@ jobs:
         run: python3 errata_check.py examples/minimal/audit.toml
       - name: 見本が通る（分野ごと）
         run: python3 errata_check.py examples/disciplines/audit.toml
+      - name: 見本が通る（参考文献の使い方）
+        run: python3 errata_check.py examples/references/audit.toml
       - name: 見本が作り直せる
         run: |
           python3 examples/minimal/build.py
           python3 examples/disciplines/build.py
+          python3 examples/references/build.py
           git diff --exit-code -- examples
