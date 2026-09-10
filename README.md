@@ -330,6 +330,13 @@ Zenodo に登録した v0.1.0 と v0.2.0 のレコードには、この記載が
 ファイルは差し替えられないため、直せるのはこちら側だけである
 （[self-correction](https://github.com/cpsbvbng26-dotcom/self-correction) の `TL-001`）。
 
+## 手を入れるときに
+
+[CONTRIBUTING.md](CONTRIBUTING.md) にある。**検査を足すときは、壊す試験も一緒に足す。**
+維持しているのは著者一人で、組織の後ろ盾は無い。範囲と後方互換の方針も同じ文書にある。
+
+---
+
 ## 出す先
 
 **JOSS（Journal of Open Source Software）に出す。**論文は [`paper.md`](paper.md)、
