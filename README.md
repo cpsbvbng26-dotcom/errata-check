@@ -330,6 +330,12 @@ Zenodo に登録した v0.1.0 と v0.2.0 のレコードには、この記載が
 ファイルは差し替えられないため、直せるのはこちら側だけである
 （[self-correction](https://github.com/cpsbvbng26-dotcom/self-correction) の `TL-001`）。
 
+## 変更履歴
+
+[CHANGELOG.md](CHANGELOG.md)。**写して使っている側は、自分が写した版の欄だけを見ればよい。**
+
+---
+
 ## 手を入れるときに
 
 [CONTRIBUTING.md](CONTRIBUTING.md) にある。**検査を足すときは、壊す試験も一緒に足す。**
