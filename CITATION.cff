@@ -28,10 +28,10 @@ authors:
     alias: Takuya Nemoto
     orcid: "https://orcid.org/0009-0000-1406-0547"
 repository-code: "https://github.com/cpsbvbng26-dotcom/errata-check"
-doi: 10.5281/zenodo.22649899
+doi: 10.5281/zenodo.22685687
 license: MIT
-version: 0.2.0
-date-released: "2026-09-07"
+version: 0.3.0
+date-released: "2026-09-10"
 keywords:
   - research integrity
   - errata

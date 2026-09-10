@@ -2,7 +2,7 @@
 
 [![検査](https://github.com/cpsbvbng26-dotcom/errata-check/actions/workflows/verify.yml/badge.svg)](https://github.com/cpsbvbng26-dotcom/errata-check/actions/workflows/verify.yml)
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22649899.svg)](https://doi.org/10.5281/zenodo.22649899)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22685687.svg)](https://doi.org/10.5281/zenodo.22685687)
 
 **凍結された公開物に対して、正誤表のほうを機械で監査する。**
 
