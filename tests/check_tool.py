@@ -11,6 +11,7 @@
 """
 
 import io
+import json
 import os
 import re
 import shutil
@@ -446,6 +447,38 @@ for rel, pattern in [("README.md", r"壊す先は (\d+) 通り"),
           ("名乗り %s / 実際 %d" % (m.group(1), BREAKS)) if m
           else "名乗っている箇所が見つからない")
 
+
+# ------------------------------------------------- 版と表題の食い違い
+#
+# **v0.2.0 のタグから 87 行離れたまま、__version__ が 0.2.0 を名乗っていた。**
+# 同じ番号が別の中身を指す —— この道具が捕まえるために書かれたものそのものである。
+# 版を書いている場所は四つあり、そのどれかが遅れると同じことが起きる。
+#
+# 表題も同じ形の穴を持っていた。**.zenodo.json は GitHub からの登録に使われるので、
+# ここが古いままだと、Zenodo の頁で手で直した表題が次のリリースで戻る。**
+
+TOOL_SRC = io.open(os.path.join(ROOT, "errata_check.py"), encoding="utf-8").read()
+VERSION = re.search(r'__version__ = "([^"]+)"', TOOL_SRC).group(1)
+
+_pyproject = io.open(os.path.join(ROOT, "pyproject.toml"), encoding="utf-8").read()
+_citation = io.open(os.path.join(ROOT, "CITATION.cff"), encoding="utf-8").read()
+_changelog = io.open(os.path.join(ROOT, "CHANGELOG.md"), encoding="utf-8").read()
+_zenodo = json.loads(io.open(os.path.join(ROOT, ".zenodo.json"), encoding="utf-8").read())
+_paper = io.open(os.path.join(ROOT, "paper.md"), encoding="utf-8").read()
+
+for rel, pattern, text in [
+        ("pyproject.toml", r'^version = "([^"]+)"', _pyproject),
+        ("CITATION.cff", r"^version: (\S+)", _citation),
+        ("CHANGELOG.md", r"^## \[([0-9][^\]]*)\]", _changelog)]:
+    m = re.search(pattern, text, re.M)
+    check("%s の版が __version__ と合う" % rel,
+          m is not None and m.group(1).strip('"') == VERSION,
+          ("名乗り %s / 実際 %s" % (m.group(1), VERSION)) if m else "版の記述が見つからない")
+
+_paper_title = re.search(r"^title: '([^']+)'", _paper, re.M).group(1)
+check(".zenodo.json の表題が paper.md と揃っている",
+      _zenodo["title"].startswith(_paper_title),
+      "登録に使われるのはこちらなので、古いままだと手で直した表題が戻る")
 
 print("\n" + "-" * 58)
 if failures:

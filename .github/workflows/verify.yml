@@ -8,7 +8,7 @@ on:
 
 jobs:
   verify:
-    name: 道具自身 68 項目 / 見本 19 + 31 + 21 項目
+    name: 道具自身 72 項目 / 見本 19 + 31 + 21 項目
     runs-on: ubuntu-latest
     strategy:
       matrix:
