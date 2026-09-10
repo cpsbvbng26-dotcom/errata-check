@@ -17,7 +17,7 @@ Issue も pull request も歓迎する。**登録は要らない**（一次資�
 ## 変更を出す
 
 ```
-python3 tests/check_tool.py     # 68 項目。通ってから出す
+python3 tests/check_tool.py     # 72 項目。通ってから出す
 ```
 
 **検査を足すときは、壊す試験も一緒に足す。**
