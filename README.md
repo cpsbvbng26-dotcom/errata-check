@@ -330,6 +330,13 @@ Zenodo に登録した v0.1.0 と v0.2.0 のレコードには、この記載が
 ファイルは差し替えられないため、直せるのはこちら側だけである
 （[self-correction](https://github.com/cpsbvbng26-dotcom/self-correction) の `TL-001`）。
 
+## 出す先
+
+**JOSS（Journal of Open Source Software）に出す。**論文は [`paper.md`](paper.md)、
+手順と、通らない見込みは [`SUBMIT.md`](SUBMIT.md) にある。**結果はまだ出ていない。**
+
+---
+
 ## ライセンス
 
 [MIT](LICENSE)。© 2026 根本卓哉（Takuya Nemoto）
