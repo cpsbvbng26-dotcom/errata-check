@@ -75,7 +75,7 @@ import subprocess
 import sys
 import unicodedata
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __all__ = ["Audit", "Result", "load", "run", "normalize", "extract_text",
            "p_value", "grim_ok", "checksum_ok", "era_to_gregorian"]
 
