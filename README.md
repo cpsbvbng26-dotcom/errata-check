@@ -141,7 +141,7 @@ require_used = true      # 宣言した参考文献がすべて使われてい�
 この検査は、その本が本当にそう述べているかを見ない。見られないからである。
 見られないことを、見たふりにしない。確かめられるのは、宣言と紙面の整合だけである。
 
-見本は [`examples/references/`](examples/references/)（21 項目）にある。
+見本は [`examples/references/`](examples/references/)（23 項目）にある。
 
 ### 検定と GRIM の出どころ
 
