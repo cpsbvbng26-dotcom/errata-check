@@ -427,6 +427,21 @@ ref_case("使っていない参考文献を宣言すると落ちる",
          lambda d: edit(d, "audit.toml", 'key = "Foucault 1988"', 'key = "Rawls 1971"'),
          "宣言した参考文献がすべて使われている")
 
+# **向きが逆の抜け。**本文で名を挙げておきながら参考文献欄に無い相手は、
+# 年号つきの引用の形をとらないと reference_policy の網に掛からない。
+
+ref_case("本文だけに出る名が本文から消えると落ちる",
+         lambda d: edit(d, "essay.md",
+                        "自己への配慮を精神の修練として読む線もある (Hadot)。",
+                        "自己への配慮を精神の修練として読む線もある。"),
+         "が本文にある")
+
+ref_case("本文だけに出る名が参考文献欄に現れると落ちる",
+         lambda d: edit(d, "essay.md",
+                        "- Foucault, M. (1988). Technologies of the Self.",
+                        "- Foucault, M. (1988). Technologies of the Self.\n- Hadot, P. (1995). Philosophy as a Way of Life."),
+         "が参考文献欄に無い")
+
 
 print("\n9. 自分で名乗っている「壊す先の数」が、実際の数と合っている")
 

@@ -672,6 +672,34 @@ class Audit:
                       ("本文に無い: " + "、".join(unused[:6])) if unused
                       else "%d 件" % len(declared))
 
+    # ------------------------------------------- 本文だけに出る名
+    #
+    # reference は「参考文献欄にある項目が、本文で使われているか」を見る。
+    # **逆向きが抜けていた** —— 本文が名を挙げていて、参考文献欄に無いもの。
+    # 年号つきの引用の形をとらない言及は reference_policy の網にも掛からない。
+    # 読者は、本文で名を挙げられた相手を参考文献欄で探し、見つけられない。
+    def check_body_only(self):
+        items = self.spec.get("body_only", [])
+        if not items:
+            return
+        for it in items:
+            key = str(it.get("key", ""))
+            sid = it.get("source")
+            text = self._source_text(sid) if sid else self.document_text()
+            marker = it.get("bibliography") or "References"
+            name = "本文だけに出る「%s」" % key
+            if text is None:
+                self._add("本文だけに出る名", "%s の一次資料が読める" % name, False, sid)
+                continue
+            i = text.rfind(normalize(marker))
+            body, tail = (text[:i], text[i:]) if i > 0 else (text, "")
+            k = normalize(key)
+            self._add("本文だけに出る名", "%s が本文にある" % name,
+                      bool(k) and k in body, it.get("where", ""))
+            self._add("本文だけに出る名", "%s が参考文献欄に無い" % name,
+                      bool(k) and k not in tail,
+                      "見出し「%s」より後ろを見る" % marker)
+
     # -------------------------------------------------------- 未解決の項目
     def check_open_items(self):
         doc = self.document_text()
@@ -722,6 +750,7 @@ class Audit:
         self.check_arithmetic()
         self.check_eras()
         self.check_references()
+        self.check_body_only()
         self.check_open_items()
         self.check_dates()
         return self.results
