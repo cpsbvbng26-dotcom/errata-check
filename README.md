@@ -315,7 +315,7 @@ Zenodo にアーカイブされ、DOI が付与されています。版ごとに
 
 [![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-D97757?style=for-the-badge)](https://claude.com/claude-code)
 
-この道具の実装は、Claude Code（Anthropic）を用いて書いました。`errata_check.py`、
+この道具の実装は、Claude Code（Anthropic）を用いて書きました。`errata_check.py`、
 `tests/check_tool.py`、`examples/`、README、`CITATION.cff` のいずれもそうです。
 
 何を検査するかを決めたのは著者です。「凍結された公開物に対して、正誤表のほうを
