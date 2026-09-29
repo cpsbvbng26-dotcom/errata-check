@@ -1,0 +1,69 @@
+name: PyPI に公開
+
+# Release を公開したときに、そのタグから組んで PyPI へ出す。手で起こすこともできる。
+# 鍵は置かない。PyPI の trusted publishing で、この workflow と環境 pypi だけに許す。
+# PyPI 側の登録は利用者が行う（プロジェクトの Publishing に、この workflow の名を書く）。
+#
+# タグの版と pyproject.toml の版が違えば出さない。v0.3.0 のタグには pyproject.toml が
+# 無いので、その版はここからは出せない（self-correction の TL-002）。
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 出す版のタグ（例 v0.4.0）
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: 組んで、版を確かめ、検査を通す
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.event.release.tag_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: タグの版と pyproject.toml の版が合う
+        env:
+          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        run: |
+          python3 - <<'EOF'
+          import os, re, sys
+          tag = os.environ["TAG"]
+          if not os.path.exists("pyproject.toml"):
+              sys.exit("%s には pyproject.toml が無い。この版は PyPI に出せない" % tag)
+          v = re.search(r'^version = "([^"]+)"', open("pyproject.toml").read(), re.M).group(1)
+          if tag != "v" + v:
+              sys.exit("タグ %s と pyproject.toml の版 %s が違う" % (tag, v))
+          print("版 %s" % v)
+          EOF
+      - run: pip install pypdf build twine
+      - name: 道具自身の検査
+        run: python3 tests/check_tool.py
+      - run: python3 -m build
+      - run: twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    name: PyPI へ出す
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
