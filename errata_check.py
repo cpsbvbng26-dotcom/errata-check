@@ -352,6 +352,16 @@ class Result:
 
 # ------------------------------------------------------------------ 監査
 
+# 宣言の最上位に書いてよい表と鍵。0.4.0 からこの名前は変えない（README の「宣言の書式」）。
+# 知らない名前は黙って無視しない。`[[qoute]]` と書き間違えると引用の検査が一件も
+# 走らないまま全部通ったことになる。この道具が捕まえるために書かれた、黙ったずれそのものである。
+KNOWN_TABLES = frozenset([
+    "root", "source", "document", "quote", "count", "absent", "number",
+    "statistic", "grim", "identifier", "arithmetic", "era",
+    "reference", "reference_policy", "body_only", "open_item", "dates",
+])
+
+
 class Audit:
     """宣言どおりに検査を走らせる。
 
@@ -738,8 +748,15 @@ class Audit:
         self._add("日付", "最終更新が本文のどの日付よりも古くない", stamp >= newest,
                   "最終更新 %s / 本文の最新 %s" % (stamp, newest))
 
+    def check_declaration(self):
+        unknown = sorted(set(self.spec) - KNOWN_TABLES)
+        self._add("宣言", "宣言に知らない表や鍵が無い", not unknown,
+                  ("知らない: " + ", ".join(unknown)) if unknown
+                  else "%d 種" % len(set(self.spec) & KNOWN_TABLES))
+
     # ------------------------------------------------------------ 実行
     def run(self):
+        self.check_declaration()
         self.check_sources()
         self.check_quotes()
         self.check_absent()

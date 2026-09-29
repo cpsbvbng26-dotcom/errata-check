@@ -225,6 +225,10 @@ case("一次資料が差し替わると落ちる",
      lambda t: open(os.path.join(t, "paper.pdf"), "ab").write(b"\n% touched\n"),
      "差し替わっていない")
 
+case("宣言の表の名前を書き間違えると落ちる",
+     lambda t: edit(t, "audit.toml", "[[open_item]]", "[[open_items]]"),
+     "宣言に知らない表や鍵が無い")
+
 case("sha256 の宣言が無いと通ったことにしない",
      lambda t: edit(t, "audit.toml", "sha256 = ", "# sha256 = "),
      "sha256 が宣言されている")
@@ -503,6 +507,17 @@ check("README の「いまの版」が、変更履歴の最新の版と DOI に�
       ("README %s %s / 変更履歴 %s %s" % (_current.group(1), _current.group(2), _released,
                                           _released_doi.group(1) if _released_doi else "?"))
       if _current else "README に「いまの版」の行が見つからない")
+
+# README は宣言に書ける名前を並べ、その数を名乗っている。道具の KNOWN_TABLES と
+# 一つでも食い違えば、利用者は README を信じて書いた宣言で落とされる。
+from errata_check import KNOWN_TABLES  # noqa: E402
+_fmt = re.search(r"### 宣言の書式は固定する.*?次の (\d+) 個です。\s*```\n(.*?)```", _readme, re.S)
+_listed = set(_fmt.group(2).split()) if _fmt else set()
+check("README が並べる宣言の名前が、道具の KNOWN_TABLES と一致する",
+      _fmt is not None and _listed == set(KNOWN_TABLES)
+      and int(_fmt.group(1)) == len(KNOWN_TABLES),
+      ("名乗り %s 個 / 並べた %d 個 / 道具 %d 個" % (_fmt.group(1), len(_listed), len(KNOWN_TABLES)))
+      if _fmt else "README に「宣言の書式は固定する」の節が見つからない")
 
 _paper_title = re.search(r"^title: '([^']+)'", _paper, re.M).group(1)
 check(".zenodo.json の表題が paper.md と揃っている",
