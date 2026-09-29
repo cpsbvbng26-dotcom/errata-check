@@ -29,6 +29,13 @@ authors:
     orcid: "https://orcid.org/0009-0000-1406-0547"
 repository-code: "https://github.com/cpsbvbng26-dotcom/errata-check"
 doi: 10.5281/zenodo.22685687
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22685687
+    description: v0.3.0 の版 DOI（Zenodo）
+  - type: swh
+    value: "swh:1:dir:3bfac898ac86e7f20a5a2e9abfaf3de963e26b94"
+    description: v0.3.0 のソース（Software Heritage）
 license: MIT
 version: 0.3.0
 date-released: "2026-09-10"

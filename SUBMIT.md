@@ -23,7 +23,7 @@
 | --- | --- |
 | **リリースを切る** | 済んだ。`v0.3.0`、2026年9月10日 08:46 UTC 公開 |
 | **保管先の DOI** | 取れた。`10.5281/zenodo.22685687`（利用者から受け取った番号である。こちらから Zenodo は開けない） |
-| **版の番号** | `v0.3.0`。`__version__`・`CITATION.cff`・タグの三つを揃えてある |
+| **版の番号** | `v0.3.0`。ただしタグの中の `CITATION.cff` は `0.2.0` のまま、`pyproject.toml` はタグに無い（self-correction の `TL-002`）。次の版で揃える |
 
 旧版の DOI は残します。`10.5281/zenodo.22649899` は `v0.2.0` の記録であり、
 写して使っている `autonomy-and-self-cultivation` と `naval-gazette-notes` は
