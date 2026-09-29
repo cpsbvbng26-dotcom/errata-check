@@ -229,6 +229,11 @@ case("宣言の表の名前を書き間違えると落ちる",
      lambda t: edit(t, "audit.toml", "[[open_item]]", "[[open_items]]"),
      "宣言に知らない表や鍵が無い")
 
+case("宣言の項目の鍵を書き間違えると落ちる",
+     lambda t: edit(t, "audit.toml", 'reason = "同梱を謳っているが存在しない"',
+                    'reson = "同梱を謳っているが存在しない"'),
+     "宣言に知らない表や鍵が無い")
+
 case("sha256 の宣言が無いと通ったことにしない",
      lambda t: edit(t, "audit.toml", "sha256 = ", "# sha256 = "),
      "sha256 が宣言されている")
