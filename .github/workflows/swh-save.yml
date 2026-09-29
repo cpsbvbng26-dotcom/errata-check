@@ -4,6 +4,7 @@ name: Software Heritage に保存
 # GitHub の実行環境から保存を頼み、指定した版の中身が入ったことを確かめる。
 # SWHID のディレクトリ ID は git の tree のハッシュと同じなので、手元で計算できる。
 # 向こうにその ID があることを見るまでは、保存できたとは言わない。
+# repo を渡すと、同じ持ち主の別のリポジトリを見る。公開のものに限る。
 
 on:
   workflow_dispatch:
@@ -11,6 +12,9 @@ on:
       tag:
         description: 保存を確かめる版のタグ
         default: v0.3.0
+      repo:
+        description: 見るリポジトリ（空ならこのリポジトリ）
+        default: ''
 
 permissions:
   contents: read
@@ -23,11 +27,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          repository: ${{ inputs.repo && format('{0}/{1}', github.repository_owner, inputs.repo) || github.repository }}
           fetch-depth: 0
       - name: 保存
         env:
           TAG: ${{ inputs.tag }}
-          ORIGIN: https://github.com/${{ github.repository }}
+          ORIGIN: https://github.com/${{ inputs.repo && format('{0}/{1}', github.repository_owner, inputs.repo) || github.repository }}
         run: |
           python3 - <<'EOF'
           import json, os, subprocess, sys, time, urllib.error, urllib.request
