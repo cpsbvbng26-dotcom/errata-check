@@ -361,6 +361,29 @@ KNOWN_TABLES = frozenset([
     "reference", "reference_policy", "body_only", "open_item", "dates",
 ])
 
+# 各表の中に書いてよい鍵。道具が読む鍵に、記録のためだけに書く鍵（edition・caveat）を足したもの。
+# 表の名前と同じく、知らない鍵は黙って無視しない。`present = false` を `presnt = false` と
+# 書き間違えると、「無いはず」の宣言が「あるはず」として検査される。
+KNOWN_FIELDS = {
+    "source": {"id", "path", "sha256"},
+    "document": {"path"},
+    "quote": {"source", "text", "present", "group", "where", "in_document"},
+    "count": {"source", "group", "expect"},
+    "absent": {"glob", "reason"},
+    "number": {"label", "command", "extract", "pattern", "in"},
+    "statistic": {"test", "value", "df", "reported", "tail", "consistent", "where",
+                  "source", "text"},
+    "grim": {"mean", "n", "decimals", "items", "attainable", "where", "source", "text"},
+    "identifier": {"kind", "value", "source", "in_document"},
+    "arithmetic": {"label", "source", "texts", "values", "op", "equals", "tolerance"},
+    "era": {"text", "gregorian", "source"},
+    "reference": {"key", "source", "locus", "supports", "role", "edition", "caveat"},
+    "reference_policy": {"pattern", "source", "ignore", "require_all", "require_used"},
+    "body_only": {"key", "source", "bibliography", "where"},
+    "open_item": {"id", "heading_pattern", "must_say", "must_not_say"},
+    "dates": {"stamp_pattern", "any_pattern"},
+}
+
 
 class Audit:
     """宣言どおりに検査を走らせる。
@@ -750,6 +773,15 @@ class Audit:
 
     def check_declaration(self):
         unknown = sorted(set(self.spec) - KNOWN_TABLES)
+        for table, allowed in sorted(KNOWN_FIELDS.items()):
+            entries = self.spec.get(table)
+            if isinstance(entries, dict):
+                entries = [entries]
+            for i, entry in enumerate(entries or []):
+                if not isinstance(entry, dict):
+                    continue
+                for field in sorted(set(entry) - allowed):
+                    unknown.append("%s[%d].%s" % (table, i, field))
         self._add("宣言", "宣言に知らない表や鍵が無い", not unknown,
                   ("知らない: " + ", ".join(unknown)) if unknown
                   else "%d 種" % len(set(self.spec) & KNOWN_TABLES))
