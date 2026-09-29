@@ -490,6 +490,20 @@ for rel, pattern, text in [
           m is not None and m.group(1).strip('"') == VERSION,
           ("名乗り %s / 実際 %s" % (m.group(1), VERSION)) if m else "版の記述が見つからない")
 
+# README の引用欄も版を名乗っている。**v0.3.0 を出したあとも「v0.2.0（いまの版）」の
+# まま 19 日残っていた。**上の四つと違ってどの検査も見ていなかったので、誰も気付かなかった。
+_readme = io.open(os.path.join(ROOT, "README.md"), encoding="utf-8").read()
+_released = re.search(r"^## \[([0-9][^\]]*)\]", _changelog, re.M).group(1)
+_released_doi = re.search(r"^## \[" + re.escape(_released) + r"\][^\n]*\n+DOI: `([^`]+)`",
+                          _changelog, re.M)
+_current = re.search(r"^\| v([0-9][^ ]*)（いまの版） \| \[([^\]]+)\]", _readme, re.M)
+check("README の「いまの版」が、変更履歴の最新の版と DOI に合う",
+      _current is not None and _released_doi is not None
+      and (_current.group(1), _current.group(2)) == (_released, _released_doi.group(1)),
+      ("README %s %s / 変更履歴 %s %s" % (_current.group(1), _current.group(2), _released,
+                                          _released_doi.group(1) if _released_doi else "?"))
+      if _current else "README に「いまの版」の行が見つからない")
+
 _paper_title = re.search(r"^title: '([^']+)'", _paper, re.M).group(1)
 check(".zenodo.json の表題が paper.md と揃っている",
       _zenodo["title"].startswith(_paper_title),
