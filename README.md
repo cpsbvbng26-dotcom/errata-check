@@ -95,7 +95,7 @@ gregorian = 1943
 機械で押さえるための欄です。
 
 ```
-python3 errata_check.py examples/disciplines/audit.toml    # 31 項目
+python3 errata_check.py examples/disciplines/audit.toml    # 32 項目
 ```
 
 ### 参考文献 —— 「読んだ」とは書かせない
@@ -141,7 +141,7 @@ require_used = true      # 宣言した参考文献がすべて使われてい�
 この検査は、その本が本当にそう述べているかを見ません。見られないからです。
 見られないことを、見たふりにしません。確かめられるのは、宣言と紙面の整合だけです。
 
-見本は [`examples/references/`](examples/references/)（23 項目）にあります。
+見本は [`examples/references/`](examples/references/)（24 項目）にあります。
 
 ### 検定と GRIM の出どころ
 
@@ -215,10 +215,27 @@ any_pattern = "(\\d{4})年(\\d{1,2})月(\\d{1,2})日"
 
 `.json` でも書けます。TOML には Python 3.11 以降（`tomllib`）が要ります。
 
+### 宣言の書式は固定する
+
+0.4.0 から、宣言の最上位に書ける表と鍵の名前を固定します。次の 17 個です。
+
+```
+root  source  document  quote  count  absent  number  statistic  grim
+identifier  arithmetic  era  reference  reference_policy  body_only
+open_item  dates
+```
+
+これ以外の名前があれば、「宣言」の組の検査で落とします。以前は黙って無視していました。
+`[[qoute]]` と書き間違えると、引用の検査が一件も走らないまま全部通ったことになります。
+この道具が捕まえようとしている「黙ったずれ」を、道具自身の入口で起こしていたことになります。
+
+名前を変える必要が出たら、古い名前も受け付けたまま版を上げ、ここに移行の手順を書きます
+（`CONTRIBUTING.md` の後方互換の方針）。
+
 動く見本が [`examples/minimal/`](examples/minimal/) にあります。
 
 ```
-python3 errata_check.py examples/minimal/audit.toml     # 19 項目
+python3 errata_check.py examples/minimal/audit.toml     # 20 項目
 ```
 
 ## 空白の扱い
@@ -231,15 +248,15 @@ PDF から取り出した文字列は、改行や空白の入り方が処理系�
 ## この道具自身の検査
 
 ```
-python3 tests/check_tool.py     # 75 項目
+python3 tests/check_tool.py     # 77 項目
 ```
 
 検査の道具は、通ることでは信用できません。何も見ていなくても全部通るからです。
 そこで、通る状態を作ってから**一つずつ壊し、壊したところがちょうど落ちること**を
 確かめています。落ちなければ、その検査は何も見ていません。
 
-壊す先は 28 通りあります。引用を一字変える、無い引用を「ある」と宣言する、
-無いはずの記述を一次資料に置く、件数を偽る、PDF を差し替える、`sha256` の宣言を消す、
+壊す先は 29 通りあります。引用を一字変える、無い引用を「ある」と宣言する、
+無いはずの記述を一次資料に置く、件数を偽る、PDF を差し替える、`sha256` の宣言を消す、宣言の表の名前を書き間違える、
 無いはずのファイルを置く、名乗る件数をずらす、コマンドの側の結果をずらす、
 「解決しない」を消す、「解決済み」に書き換える、見出しを消す、日付を古くする、
 印字された `p` を偽る、自由度を偽る、到達できない平均を到達できると宣言する、
