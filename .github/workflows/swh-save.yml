@@ -1,0 +1,68 @@
+name: Software Heritage に保存
+
+# 手で起こすときだけ動く。作業環境からは Software Heritage に届かないので、
+# GitHub の実行環境から保存を頼み、指定した版の中身が入ったことを確かめる。
+# SWHID のディレクトリ ID は git の tree のハッシュと同じなので、手元で計算できる。
+# 向こうにその ID があることを見るまでは、保存できたとは言わない。
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 保存を確かめる版のタグ
+        default: v0.3.0
+
+permissions:
+  contents: read
+
+jobs:
+  save:
+    name: 保存を頼み、版の中身が入ったことを確かめる
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 保存
+        env:
+          TAG: ${{ inputs.tag }}
+          ORIGIN: https://github.com/${{ github.repository }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, subprocess, sys, time, urllib.error, urllib.request
+
+          API = "https://archive.softwareheritage.org/api/1"
+          tag, origin = os.environ["TAG"], os.environ["ORIGIN"]
+          git = lambda ref: subprocess.check_output(["git", "rev-parse", ref], text=True).strip()
+          tree, rev = git(tag + "^{tree}"), git(tag + "^{commit}")
+
+          def call(method, path):
+              req = urllib.request.Request(API + path, method=method)
+              try:
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      return r.status, json.load(r)
+              except urllib.error.HTTPError as e:
+                  return e.code, None
+
+          def archived():
+              return call("GET", "/directory/%s/" % tree)[0] == 200
+
+          if not archived():
+              status, body = call("POST", "/origin/save/git/url/%s/" % origin)
+              print("保存の依頼:", status, body and body.get("save_request_status"))
+              if status not in (200, 201):
+                  sys.exit("保存の依頼が通らなかった")
+              # 取り込みは数分から数時間かかる。入るまで待つ。
+              deadline = time.time() + 140 * 60
+              while not archived():
+                  if time.time() > deadline:
+                      sys.exit("時間内に入らなかった。依頼は残っているので、あとでもう一度起こす")
+                  time.sleep(120)
+
+          swhid = "swh:1:dir:%s;origin=%s;anchor=swh:1:rev:%s" % (tree, origin, rev)
+          line = "%s の中身は Software Heritage に入っている。\n\n```\n%s\n```\n" % (tag, swhid)
+          print(line)
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write(line)
+          EOF
