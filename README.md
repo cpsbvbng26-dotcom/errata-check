@@ -342,7 +342,7 @@ swh:1:dir:3bfac898ac86e7f20a5a2e9abfaf3de963e26b94
 
 引用のための情報は [`CITATION.cff`](CITATION.cff) にもあります。
 
-## AI の利用
+## 言語モデルの利用
 
 [![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-D97757?style=for-the-badge)](https://claude.com/claude-code)
 
@@ -353,7 +353,7 @@ swh:1:dir:3bfac898ac86e7f20a5a2e9abfaf3de963e26b94
 決定的に監査する」という切り口、判定に推論を使わないという方針、宣言の書式、
 通る状態を壊して落ちることまで確かめる試験の作り方 ―― これらは著者の判断です。
 
-検査が報告する数値は、すべて実行して得たものです。AI は著作者ではありません。いずれの
+検査が報告する数値は、すべて実行して得たものです。言語モデルは著作者ではありません。いずれの
 主張についても、責任は著者（根本卓哉）にあります。
 
 このリポジトリのコミットは `Claude` 名義であり、末尾に作業セッションを示す
