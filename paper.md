@@ -162,11 +162,11 @@ and can be listed with `git log`.
 documentation drafting, and drafting of this paper.
 
 **Confirmation of review.** The author reviewed, edited and validated all
-AI-assisted output, and made the core design decisions: the framing that the
+LLM-assisted output, and made the core design decisions: the framing that the
 correction record rather than the frozen artifact is the object to be audited; the
 rule that no inference may enter a verdict; the structure of the declaration
 language; and the break-test method described above. Every number reported in this
-paper was produced by executing the code. AI is not an author. The author is
+paper was produced by executing the code. The language model is not an author. The author is
 responsible for the accuracy, originality and licensing of all submitted material.
 
 # Acknowledgements
