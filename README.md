@@ -4,6 +4,8 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22685687.svg)](https://doi.org/10.5281/zenodo.22685687)
 
+[English](README.en.md) ｜ **日本語**
+
 凍結された公開物に対して、正誤表のほうを機械で監査します。
 
 DOI が付いて公開された PDF は、もう直せません。直せるのは正誤表のほうです。
@@ -252,7 +254,7 @@ PDF から取り出した文字列は、改行や空白の入り方が処理系�
 ## この道具自身の検査
 
 ```
-python3 tests/check_tool.py     # 78 項目
+python3 tests/check_tool.py     # 82 項目
 ```
 
 検査の道具は、通ることでは信用できません。何も見ていなくても全部通るからです。
