@@ -462,6 +462,7 @@ BREAKS = (len(re.findall(r"^\s*case\(", SELF, re.M))
           + len(re.findall(r"^ref_case\(", SELF, re.M)))
 
 for rel, pattern in [("README.md", r"壊す先は (\d+) 通り"),
+                     ("README.en.md", r"break it in (\d+) distinct ways"),
                      ("CITATION.cff", r"(\d+) 通りに壊して"),
                      (".zenodo.json", r"breaking it in (\d+) distinct ways")]:
     text = io.open(os.path.join(ROOT, rel), encoding="utf-8").read()
@@ -523,6 +524,33 @@ check("README が並べる宣言の名前が、道具の KNOWN_TABLES と一致�
       and int(_fmt.group(1)) == len(KNOWN_TABLES),
       ("名乗り %s 個 / 並べた %d 個 / 道具 %d 個" % (_fmt.group(1), len(_listed), len(KNOWN_TABLES)))
       if _fmt else "README に「宣言の書式は固定する」の節が見つからない")
+
+# 英語の README は日本語の README の写しである。**写しの数が元とずれれば、英語で読む人だけが
+# 古い数を信じる。**版・宣言の名前・名乗る項目数を、日本語の側と同じ物差しで突き合わせる。
+_readme_en = io.open(os.path.join(ROOT, "README.en.md"), encoding="utf-8").read()
+_current_en = re.search(r"^\| v([0-9][^ ]*) \(current\) \| \[([^\]]+)\]", _readme_en, re.M)
+check("英語の README の「current」が、変更履歴の最新の版と DOI に合う",
+      _current_en is not None and _released_doi is not None
+      and (_current_en.group(1), _current_en.group(2)) == (_released, _released_doi.group(1)),
+      ("README.en %s %s / 変更履歴 %s" % (_current_en.group(1), _current_en.group(2), _released))
+      if _current_en else "英語の README に「current」の行が見つからない")
+
+_fmt_en = re.search(r"### The declaration format is fixed.*?the following (\d+) names:\s*```\n(.*?)```",
+                    _readme_en, re.S)
+_listed_en = set(_fmt_en.group(2).split()) if _fmt_en else set()
+check("英語の README が並べる宣言の名前が、道具の KNOWN_TABLES と一致する",
+      _fmt_en is not None and _listed_en == set(KNOWN_TABLES)
+      and int(_fmt_en.group(1)) == len(KNOWN_TABLES),
+      ("名乗り %s 個 / 並べた %d 個" % (_fmt_en.group(1), len(_listed_en)))
+      if _fmt_en else "英語の README に宣言の書式の節が見つからない")
+
+_nums_ja = (re.findall(r"# (\d+) 項目", _readme) + re.findall(r"（(\d+) 項目）", _readme)
+            + re.findall(r"(\d+) 点で突き合わせ", _readme))
+_nums_en = (re.findall(r"# (\d+) checks", _readme_en) + re.findall(r"\((\d+) checks\)", _readme_en)
+            + re.findall(r"(\d+) points\*\* of the", _readme_en))
+check("英語の README が名乗る項目数が、日本語の README と同じ並びで一致する",
+      len(_nums_ja) > 0 and _nums_ja == _nums_en,
+      "日本語 %s / 英語 %s" % (_nums_ja, _nums_en))
 
 _paper_title = re.search(r"^title: '([^']+)'", _paper, re.M).group(1)
 check(".zenodo.json の表題が paper.md と揃っている",
