@@ -227,6 +227,28 @@ python3 errata_check.py examples/minimal/audit.toml     # 20 checks
 
 Text extracted from a PDF varies in its line breaks and spacing from one extractor to another. Before comparison, `NFKC` is applied, zero-width characters are dropped, and runs of whitespace are collapsed to one. Characters themselves are never replaced. So "a quotation differs by one character" fails, while "a line was wrapped" does not.
 
+## Use as a GitHub Action
+
+There is an `action.yml` at the root of the repository. A workflow can call it like this:
+
+```yaml
+- uses: actions/checkout@v4
+- uses: cpsbvbng26-dotcom/errata-check@main
+  with:
+    spec: verification/audit.toml
+```
+
+`spec` is the path to the declaration. Paths inside the declaration are resolved from the directory the declaration sits in.
+Setting `pdf` to `'false'` skips installing `pypdf`; that is enough for a declaration with no PDF sources.
+`python-version` selects the Python version.
+
+If any audit item fails, the step fails. The result table goes to the log as it is.
+
+`@main` is a moving target. There is no tag yet. Until there is, pinning to a commit SHA keeps the contents from moving.
+
+This repository's own CI uses the Action on itself. It checks both that the example passes and that
+a copy with a shifted count declaration fails.
+
 ## The tool's own checks
 
 ```

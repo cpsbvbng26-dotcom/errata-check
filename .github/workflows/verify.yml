@@ -33,3 +33,33 @@ jobs:
           python3 examples/disciplines/build.py
           python3 examples/references/build.py
           git diff --exit-code -- examples
+
+  # action.yml を、この道具自身のリポジトリで使ってみる。
+  # 通る見本が通るだけでは、何も見ていない Action でも同じ結果になる。
+  # だから壊した写しも渡し、そちらが落ちることまで見る。
+  action:
+    name: Action として使える（通る見本は通り、壊した写しは落ちる）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 見本が通る
+        uses: ./
+        with:
+          spec: examples/minimal/audit.toml
+      - name: 件数の宣言をずらした写しを作る
+        run: |
+          cp -r examples/minimal "$RUNNER_TEMP/broken"
+          sed -i 's/^expect = 2$/expect = 3/' "$RUNNER_TEMP/broken/audit.toml"
+          grep -q '^expect = 3$' "$RUNNER_TEMP/broken/audit.toml"
+      - name: 壊した写しを渡す
+        id: broken
+        continue-on-error: true
+        uses: ./
+        with:
+          spec: ${{ runner.temp }}/broken/audit.toml
+      - name: 壊した写しで落ちたことを確かめる
+        env:
+          OUTCOME: ${{ steps.broken.outcome }}
+        run: |
+          echo "壊した写しの結果: $OUTCOME"
+          test "$OUTCOME" = "failure"
