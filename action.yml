@@ -1,0 +1,41 @@
+name: errata-check
+description: Audit a correction record (errata) against the frozen scholarly artifacts it describes. Deterministic; no inference in any verdict.
+author: Takuya Nemoto
+
+branding:
+  icon: check-square
+  color: gray-dark
+
+inputs:
+  spec:
+    description: Path to the audit declaration (.toml or .json), relative to the repository root. Paths inside it are resolved from the declaration's own directory.
+    required: true
+    default: audit.toml
+  pdf:
+    description: Install pypdf so that PDF sources can be read ('true' or 'false').
+    required: false
+    default: 'true'
+  python-version:
+    description: Python version used to run the tool.
+    required: false
+    default: '3.12'
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install pypdf
+      if: ${{ inputs.pdf == 'true' }}
+      shell: bash
+      run: python -m pip install --disable-pip-version-check pypdf
+
+    # 入力は環境変数で渡す。run の中に ${{ }} で直接埋めると、
+    # 宣言のパスに書かれた文字列がそのままシェルとして読まれる。
+    - name: Run errata-check
+      shell: bash
+      env:
+        ERRATA_CHECK_SPEC: ${{ inputs.spec }}
+      run: python "$GITHUB_ACTION_PATH/errata_check.py" "$ERRATA_CHECK_SPEC"
