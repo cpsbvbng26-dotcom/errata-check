@@ -49,7 +49,7 @@ jobs:
         run: python3 tests/check_tool.py
       - run: python3 -m build
       - run: twine check dist/*
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
