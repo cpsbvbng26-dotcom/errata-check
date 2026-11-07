@@ -232,7 +232,7 @@ Text extracted from a PDF varies in its line breaks and spacing from one extract
 There is an `action.yml` at the root of the repository. A workflow can call it like this:
 
 ```yaml
-- uses: actions/checkout@v4
+- uses: actions/checkout@v7
 - uses: cpsbvbng26-dotcom/errata-check@main
   with:
     spec: verification/audit.toml

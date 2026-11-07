@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ${{ inputs.repo && format('{0}/{1}', github.repository_owner, inputs.repo) || github.repository }}
           fetch-depth: 0
