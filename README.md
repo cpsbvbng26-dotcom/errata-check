@@ -256,7 +256,7 @@ PDF から取り出した文字列は、改行や空白の入り方が処理系�
 リポジトリの直下に `action.yml` があります。使う側のワークフローからは、次の手順で呼べます。
 
 ```yaml
-- uses: actions/checkout@v4
+- uses: actions/checkout@v7
 - uses: cpsbvbng26-dotcom/errata-check@main
   with:
     spec: verification/audit.toml
