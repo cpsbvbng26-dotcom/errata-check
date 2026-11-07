@@ -24,7 +24,7 @@ jobs:
     name: 組んで、版を確かめ、検査を通す
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.tag || github.event.release.tag_name }}
       - uses: actions/setup-python@v5
