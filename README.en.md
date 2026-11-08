@@ -359,3 +359,5 @@ It will be submitted to JOSS (Journal of Open Source Software). The paper is [`p
 ## Where it is used
 
 - [trinity-infinity](https://github.com/cpsbvbng26-dotcom/trinity-infinity): the author's audit of the errata for the author's own three papers
+
+The extent of liability is set out in the [Disclaimer](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.en.md).

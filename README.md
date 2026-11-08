@@ -414,3 +414,5 @@ JOSS（Journal of Open Source Software）に出します。論文は [`paper.md`
 ## 使われている場所
 
 - [trinity-infinity](https://github.com/cpsbvbng26-dotcom/trinity-infinity) —— 著者本人による、自分の三篇の正誤表の監査
+
+責任の範囲は、[免責事項](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.md)に定めています。
