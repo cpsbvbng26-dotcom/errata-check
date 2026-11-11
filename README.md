@@ -1,5 +1,7 @@
 # errata-check
 
+種類：ソフトウェア　状態：改訂中
+
 [![検査](https://github.com/cpsbvbng26-dotcom/errata-check/actions/workflows/verify.yml/badge.svg)](https://github.com/cpsbvbng26-dotcom/errata-check/actions/workflows/verify.yml)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22685687.svg)](https://doi.org/10.5281/zenodo.22685687)
@@ -25,6 +27,32 @@ python3 errata_check.py audit.toml
 
 判定に推論を使いません。あるか、無いか、一致するか、しないか。LLM も類似度も
 使いません。だから出力を人が確かめ直す必要がありません。
+
+PDF を読むところだけが `pypdf` を使います。それ以外は Python の標準ライブラリだけで動きます。
+平文（`.txt`・`.md`）の一次資料と JSON の宣言なら、何も入れずに走ります。
+
+### 何を渡すと、何が返るか
+
+```mermaid
+flowchart LR
+  spec["宣言<br>audit.toml"] --> tool["errata_check.py"]
+  doc["正誤表<br>ERRATA.md"] --> tool
+  src["凍結された一次資料<br>paper.pdf・平文"] --> tool
+  tool --> table["組ごとの PASS と FAIL の表<br>--json なら JSON"]
+  tool --> code["終了コード<br>0 = 全部通る / 1 = 一つでも落ちる"]
+```
+
+### 一分で試す
+
+```
+git clone https://github.com/cpsbvbng26-dotcom/errata-check.git
+cd errata-check
+pip install pypdf
+python3 errata_check.py examples/minimal/audit.toml
+```
+
+全部通れば、最後の行が「すべて通りました。」で終わります。
+見本を一か所だけ壊して、落ちるところまで見る手順は [`examples/README.md`](examples/README.md) にあります。
 
 ---
 
@@ -332,11 +360,13 @@ ORCID を一桁変える、ISBN を一桁変える、内訳の和を崩す、和
 Zenodo にアーカイブされ、DOI が付与されています。版ごとに DOI が違います。
 使った版の番号を書くこと。
 
-| 版 | DOI |
-| --- | --- |
-| v0.3.0（いまの版） | [10.5281/zenodo.22685687](https://doi.org/10.5281/zenodo.22685687) |
-| v0.2.0 | [10.5281/zenodo.22649899](https://doi.org/10.5281/zenodo.22649899) |
-| v0.1.0 | [10.5281/zenodo.22649054](https://doi.org/10.5281/zenodo.22649054) |
+| 版 | DOI | 公開日 | 変更履歴 |
+| --- | --- | --- | --- |
+| v0.3.0（いまの版） | [10.5281/zenodo.22685687](https://doi.org/10.5281/zenodo.22685687) | 2026-09-10 | [0.3.0](CHANGELOG.md#030--2026-09-10) |
+| v0.2.0 | [10.5281/zenodo.22649899](https://doi.org/10.5281/zenodo.22649899) | 2026-09-07 | [0.2.0](CHANGELOG.md#020--2026-09-07) |
+| v0.1.0 | [10.5281/zenodo.22649054](https://doi.org/10.5281/zenodo.22649054) | 2026-09-07 | [0.1.0](CHANGELOG.md#010--2026-09-07) |
+
+この表の行は、`CHANGELOG.md` の版の欄と同じ並びです。版・公開日・DOI が一つでも食い違えば、`tests/check_tool.py` が落とします。
 
 > 根本卓哉 (2026). *errata-check: Deterministic auditing of errata against frozen
 > published artifacts / 凍結された公開物に対する、決定的な正誤表の監査* (v0.3.0).

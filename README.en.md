@@ -1,5 +1,7 @@
 # errata-check
 
+Type: Software · Status: In revision
+
 [![Checks](https://github.com/cpsbvbng26-dotcom/errata-check/actions/workflows/verify.yml/badge.svg)](https://github.com/cpsbvbng26-dotcom/errata-check/actions/workflows/verify.yml)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22685687.svg)](https://doi.org/10.5281/zenodo.22685687)
@@ -23,6 +25,34 @@ python3 errata_check.py audit.toml
 ```
 
 No inference is used in the judgement. Something is there or it is not; it matches or it does not. No language model and no similarity score is involved, so nobody has to re-check the output by hand.
+
+Only the reading of PDFs uses `pypdf`. Everything else runs on the Python standard library alone. With plain-text sources (`.txt`, `.md`) and a JSON declaration, nothing needs to be installed.
+
+### What goes in, what comes out
+
+```mermaid
+flowchart LR
+  spec["declaration<br>audit.toml"] --> tool["errata_check.py"]
+  doc["errata<br>ERRATA.md"] --> tool
+  src["frozen primary sources<br>paper.pdf, plain text"] --> tool
+  tool --> table["a PASS / FAIL table, group by group<br>JSON with --json"]
+  tool --> code["exit status<br>0 = all pass / 1 = any fails"]
+```
+
+### Try it in a minute
+
+```
+git clone https://github.com/cpsbvbng26-dotcom/errata-check.git
+cd errata-check
+pip install pypdf
+python3 errata_check.py examples/minimal/audit.toml
+```
+
+If everything passes, the last line ends with 「すべて通りました。」 ("all passed"). The steps for breaking the example in one place and watching it fail are in [`examples/README.md`](examples/README.md).
+
+### A note on language
+
+The comments and docstrings in the code, the labels of the checks, and the messages the tool prints are in Japanese, as are `CHANGELOG.md`, `CONTRIBUTING.md` and `SUBMIT.md`. What a program reads is not: the names of the declaration's tables and keys, the `PASS` and `FAIL` markers, the exit status, and the keys of the `--json` output (`version`, `passed`, `failed`, `results`, and `group`, `label`, `ok`, `detail` for each result) are the same in any language. The issue form for bug reports is in both languages.
 
 ---
 
@@ -290,11 +320,13 @@ This tool does not judge whether the errata is right. It only checks whether the
 
 The tool is archived on Zenodo with a DOI. Each version has its own DOI; cite the version you used.
 
-| Version | DOI |
-| --- | --- |
-| v0.3.0 (current) | [10.5281/zenodo.22685687](https://doi.org/10.5281/zenodo.22685687) |
-| v0.2.0 | [10.5281/zenodo.22649899](https://doi.org/10.5281/zenodo.22649899) |
-| v0.1.0 | [10.5281/zenodo.22649054](https://doi.org/10.5281/zenodo.22649054) |
+| Version | DOI | Released | Changes |
+| --- | --- | --- | --- |
+| v0.3.0 (current) | [10.5281/zenodo.22685687](https://doi.org/10.5281/zenodo.22685687) | 2026-09-10 | [0.3.0](CHANGELOG.md#030--2026-09-10) |
+| v0.2.0 | [10.5281/zenodo.22649899](https://doi.org/10.5281/zenodo.22649899) | 2026-09-07 | [0.2.0](CHANGELOG.md#020--2026-09-07) |
+| v0.1.0 | [10.5281/zenodo.22649054](https://doi.org/10.5281/zenodo.22649054) | 2026-09-07 | [0.1.0](CHANGELOG.md#010--2026-09-07) |
+
+The rows follow the version sections of `CHANGELOG.md` (in Japanese), in the same order. If a version, a date or a DOI differs, `tests/check_tool.py` fails.
 
 > Nemoto, T. (2026). *errata-check: Deterministic auditing of errata against frozen
 > published artifacts* (v0.3.0). Zenodo. https://doi.org/10.5281/zenodo.22685687
