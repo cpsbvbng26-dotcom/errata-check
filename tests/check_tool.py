@@ -272,7 +272,7 @@ print("\n3. 分布を、公表されている数値表と突き合わせる")
 
 # 実装が正しいかどうかは、実装だけでは分からない。外の値と当たる。
 # 出典は標準的な統計数値表の 5% 点・1% 点。
-for label, got, want, tol in [
+TABLE_POINTS = [
     ("t(0.05, df=10) = 2.228", p_value("t", 2.228, [10]), 0.05, 5e-4),
     ("t(0.01, df=10) = 3.169", p_value("t", 3.169, [10]), 0.01, 5e-4),
     ("t(0.05, df=1) = 12.706", p_value("t", 12.706, [1]), 0.05, 5e-5),
@@ -284,7 +284,8 @@ for label, got, want, tol in [
     ("F(0.05, 3, 20) = 3.098", p_value("F", 3.098, [3, 20]), 0.05, 5e-4),
     ("F(0.01, 2, 30) = 5.390", p_value("F", 5.390, [2, 30]), 0.01, 5e-4),
     ("r = 0.5, n = 30 → p ≈ .0049", p_value("r", 0.5, [30]), 0.00485, 5e-4),
-]:
+]
+for label, got, want, tol in TABLE_POINTS:
     check(label, abs(got - want) < tol, "計算 %.6f / 表 %.4f" % (got, want))
 
 print("\n4. GRIM・検査数字・元号を、手で分かる値で当たる")
@@ -596,9 +597,28 @@ _nums_ja = (re.findall(r"# (\d+) 項目", _readme) + re.findall(r"（(\d+) 項�
             + re.findall(r"(\d+) 点で突き合わせ", _readme))
 _nums_en = (re.findall(r"# (\d+) checks", _readme_en) + re.findall(r"\((\d+) checks\)", _readme_en)
             + re.findall(r"(\d+) points\*\* of the", _readme_en))
-check("英語の README が名乗る項目数が、日本語の README と同じ並びで一致する",
-      len(_nums_ja) > 0 and _nums_ja == _nums_en,
-      "日本語 %s / 英語 %s" % (_nums_ja, _nums_en))
+# 見本の項目数は、README と CI の題が名乗り、ここで走らせた数と突き合わせる。
+# 名乗りが三箇所にあり、どれにも検査が掛かっていなかった。項目は増やさず、この検査に畳む
+# （この検査の数は、ほかのリポジトリと頁にも写してある）。
+_ran, _said = {}, {}
+for _ex in ("minimal", "disciplines", "references"):
+    _r = subprocess.run([sys.executable, os.path.join(ROOT, "errata_check.py"),
+                         os.path.join(ROOT, "examples", _ex, "audit.toml")], capture_output=True, text=True)
+    _m = re.search(r"(\d+) 件すべて通りました。", _r.stdout)
+    _ran[_ex] = int(_m.group(1)) if _m else None
+_said["minimal"] = re.findall(r"examples/minimal/audit\.toml\s+# (\d+) 項目", _readme)
+_said["disciplines"] = re.findall(r"examples/disciplines/audit\.toml\s+# (\d+) 項目", _readme)
+_said["references"] = re.findall(r"\(examples/references/\)（(\d+) 項目）", _readme)
+_ci = re.search(r"見本 (\d+) \+ (\d+) \+ (\d+) 項目",
+                io.open(os.path.join(ROOT, ".github", "workflows", "verify.yml"), encoding="utf-8").read())
+for _i, _ex in enumerate(("minimal", "disciplines", "references")):
+    _said[_ex] = [int(x) for x in _said[_ex]] + ([int(_ci.group(_i + 1))] if _ci else [])
+# README の「N 点で突き合わせて」も、3 節で当てた点の数と合うこと。
+_points = re.findall(r"(\d+) 点で突き合わせ", _readme)
+_samples_ok = bool(_points) and all(int(x) == len(TABLE_POINTS) for x in _points) and all(_ran[x] is not None and len(_said[x]) >= 2 and set(_said[x]) == {_ran[x]} for x in _ran)
+check("英語の README が名乗る項目数が、日本語の README と同じ並びで一致し、見本の数と数値表の点の数が実際と合う",
+      len(_nums_ja) > 0 and _nums_ja == _nums_en and _samples_ok,
+      "日本語 %s / 英語 %s / 見本 走らせた %s・名乗り %s / 数値表 %d 点・名乗り %s" % (_nums_ja, _nums_en, _ran, _said, len(TABLE_POINTS), _points))
 
 _paper_title = re.search(r"^title: '([^']+)'", _paper, re.M).group(1)
 # SUBMIT.md の点検表は、paper.md に JOSS が求める節と語数を「済み」としている。

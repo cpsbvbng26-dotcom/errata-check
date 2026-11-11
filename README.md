@@ -410,6 +410,11 @@ swh:1:dir:3bfac898ac86e7f20a5a2e9abfaf3de963e26b94
 検査が報告する数値は、すべて実行して得たものです。言語モデルは著作者ではありません。いずれの
 主張についても、責任は著者（根本卓哉）にあります。
 
+| 道具 | 使ったところ | 確かめた人 |
+| --- | --- | --- |
+| Claude Code（Anthropic） | `errata_check.py`、`tests/check_tool.py`、`examples/`、README、`CITATION.cff` | 著者（何を検査するか、判定に推論を使わない方針、宣言の書式）と、`tests/check_tool.py` |
+| Claude（Anthropic） | 日本語の README からの英訳（README.en.md） | 著者 |
+
 このリポジトリのコミットは `Claude` 名義であり、末尾に作業セッションを示す
 `Claude-Session:` トレーラが付きます。`git log --author=Claude` で辿れます。
 
@@ -434,6 +439,7 @@ Zenodo に登録した v0.1.0 と v0.2.0 のレコードには、この記載が
 
 JOSS（Journal of Open Source Software）に出す予定です。まだ出していません。
 2026年9月10日に、いまは出さないと決めました。出すのは、早くても 2027年3月7日より後です。
+2026年11月11日に、出す時期をもう一つ決めました。Sophaxis のコードと一緒に、2027年5月以降に出します。
 論文は [`paper.md`](paper.md)、手順と、通らない見込みは [`SUBMIT.md`](SUBMIT.md) にあります。
 
 ---

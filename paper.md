@@ -12,7 +12,7 @@ authors:
     orcid: 0009-0000-1406-0547
     affiliation: 1
 affiliations:
-  - name: Independent researcher, Japan
+  - name: ZEN University, Japan
     index: 1
 date: 10 September 2026
 bibliography: paper.bib

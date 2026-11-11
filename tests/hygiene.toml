@@ -1,0 +1,31 @@
+# check_hygiene.py が読む。このリポジトリだけの違いをここに置く。
+
+# 外部のパッケージ。pypdf は PDF を一次資料にするとき（pyproject.toml の pdf）、
+# build と twine は PyPI に出すときの組み立てと点検に使う。
+packages = ["pypdf", "build", "twine"]
+
+# 書き込みの権限。「ワークフローのファイル名:権限」。
+# PyPI の trusted publishing が id-token を要る。publish の仕事にだけ渡している。
+writes = ["pypi.yml:id-token"]
+
+# 要旨。日本語は CITATION.cff、英語は .zenodo.json に置いている。
+[abstract]
+ja = ["CITATION.cff", "abstract"]
+en = [".zenodo.json", "description"]
+
+# 散文の数。ほかの検査が拾っていなかったもの。CLAUDE.md の数は README の写し。
+# README の道具自身の数は、cpsbvbng26-dotcom の check_ecosystem.js が実際と突き合わせている。
+[[copies]]
+what = "道具自身の検査の項目数"
+from = ["README.md", 'check_tool\.py\s+# (\d+) 項目']
+to = [["CLAUDE.md", '道具自身 (\d+) 項目']]
+
+[[copies]]
+what = "見本（最小）の項目数"
+from = ["README.md", 'examples/minimal/audit\.toml\s+# (\d+) 項目']
+to = [["CLAUDE.md", 'examples/minimal/audit\.toml\s+# (\d+) 項目']]
+
+[[copies]]
+what = "見本（分野ごと）の項目数"
+from = ["README.md", 'examples/disciplines/audit\.toml\s+# (\d+) 項目']
+to = [["CLAUDE.md", 'examples/disciplines/audit\.toml\s+# (\d+) 項目']]
