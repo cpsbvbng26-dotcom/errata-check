@@ -203,7 +203,7 @@ Declarations can also be written in `.json`. TOML requires Python 3.11 or later 
 
 ### The declaration format is fixed
 
-From 0.4.0, the names of the tables and keys allowed at the top level of a declaration are fixed. These are the following 17 names:
+From the next version (planned as 0.4.0), the names of the tables and keys allowed at the top level of a declaration are fixed. These are the following 17 names:
 
 ```
 root  source  document  quote  count  absent  number  statistic  grim
@@ -318,6 +318,8 @@ The v0.3.0 source is also preserved at [Software Heritage](https://archive.softw
 swh:1:dir:3bfac898ac86e7f20a5a2e9abfaf3de963e26b94
 ```
 
+That it is preserved was confirmed with `.github/workflows/swh-save.yml`.
+
 Citation metadata is also in [`CITATION.cff`](CITATION.cff).
 
 ## Use of language models
@@ -348,7 +350,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) (in Japanese). When adding a check, add t
 
 ## Where it is going
 
-It will be submitted to JOSS (Journal of Open Source Software). The paper is [`paper.md`](paper.md); the procedure and the reasons it may not pass are in [`SUBMIT.md`](SUBMIT.md) (in Japanese). There is no result yet.
+It is to be submitted to JOSS (Journal of Open Source Software). It has not been submitted yet. On 10 September 2026 the author decided not to submit it for now; it will not be submitted before 7 March 2027. The paper is [`paper.md`](paper.md); the procedure and the reasons it may not pass are in [`SUBMIT.md`](SUBMIT.md) (in Japanese).
 
 ---
 
@@ -359,5 +361,7 @@ It will be submitted to JOSS (Journal of Open Source Software). The paper is [`p
 ## Where it is used
 
 - [trinity-infinity](https://github.com/cpsbvbng26-dotcom/trinity-infinity): the author's audit of the errata for the author's own three papers
+- [autonomy-and-self-cultivation](https://github.com/cpsbvbng26-dotcom/autonomy-and-self-cultivation): the author's audit of the errata for the author's three papers in philosophy
+- [naval-gazette-notes](https://github.com/cpsbvbng26-dotcom/naval-gazette-notes): the author's audit of the errata for an archival source note
 
 The extent of liability is set out in the [Disclaimer](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.en.md).
