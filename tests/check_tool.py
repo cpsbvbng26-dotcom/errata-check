@@ -491,14 +491,38 @@ _changelog = io.open(os.path.join(ROOT, "CHANGELOG.md"), encoding="utf-8").read(
 _zenodo = json.loads(io.open(os.path.join(ROOT, ".zenodo.json"), encoding="utf-8").read())
 _paper = io.open(os.path.join(ROOT, "paper.md"), encoding="utf-8").read()
 
-for rel, pattern, text in [
-        ("pyproject.toml", r'^version = "([^"]+)"', _pyproject),
-        ("CITATION.cff", r"^version: (\S+)", _citation),
-        ("CHANGELOG.md", r"^## \[([0-9][^\]]*)\]", _changelog)]:
+# README は「PDF を読むところだけが pypdf を使い、それ以外は標準ライブラリだけで動く」と書く。
+# その主張は、道具が読み込むモジュールを数えれば確かめられる。**書いただけにしない。**
+# 新しい検査を足すと、ここを引く文書の数が動くので、pyproject.toml の組に入れて見る。
+import ast  # noqa: E402
+
+_imported = set()
+for _node in ast.walk(ast.parse(TOOL_SRC)):
+    if isinstance(_node, ast.Import):
+        _imported.update(a.name.split(".")[0] for a in _node.names)
+    elif isinstance(_node, ast.ImportFrom) and _node.level == 0 and _node.module:
+        _imported.add(_node.module.split(".")[0])
+_STDLIB = getattr(sys, "stdlib_module_names", None)
+_outside = sorted(m for m in _imported if _STDLIB is not None and m not in _STDLIB and m != "__future__")
+_deps = re.search(r"^dependencies = \[\]$", _pyproject, re.M)
+_pdf_extra = re.search(r'^pdf = \["pypdf[^"]*"\]$', _pyproject, re.M)
+_stdlib_only = (_STDLIB is not None and _outside == ["pypdf"]
+                and _deps is not None and _pdf_extra is not None)
+_stdlib_detail = ("標準ライブラリの外: %s / dependencies = [] %s / pdf = [pypdf] %s"
+                  % (", ".join(_outside) or "無し", "有り" if _deps else "無し",
+                     "有り" if _pdf_extra else "無し")) if _STDLIB is not None \
+    else "sys.stdlib_module_names が無い（Python 3.10 以降で走らせる）"
+
+for rel, pattern, text, extra, extra_label in [
+        ("pyproject.toml", r'^version = "([^"]+)"', _pyproject, _stdlib_only,
+         "。依存は無く、道具が読むのは標準ライブラリと PDF のときの pypdf だけである"),
+        ("CITATION.cff", r"^version: (\S+)", _citation, True, ""),
+        ("CHANGELOG.md", r"^## \[([0-9][^\]]*)\]", _changelog, True, "")]:
     m = re.search(pattern, text, re.M)
-    check("%s の版が __version__ と合う" % rel,
-          m is not None and m.group(1).strip('"') == VERSION,
-          ("名乗り %s / 実際 %s" % (m.group(1), VERSION)) if m else "版の記述が見つからない")
+    check("%s の版が __version__ と合う%s" % (rel, extra_label),
+          m is not None and m.group(1).strip('"') == VERSION and extra,
+          (("名乗り %s / 実際 %s" % (m.group(1), VERSION)) if m else "版の記述が見つからない")
+          + ("" if extra else "  " + _stdlib_detail))
 
 # README の引用欄も版を名乗っている。**v0.3.0 を出したあとも「v0.2.0（いまの版）」の
 # まま 19 日残っていた。**上の四つと違ってどの検査も見ていなかったので、誰も気付かなかった。
@@ -507,11 +531,31 @@ _released = re.search(r"^## \[([0-9][^\]]*)\]", _changelog, re.M).group(1)
 _released_doi = re.search(r"^## \[" + re.escape(_released) + r"\][^\n]*\n+DOI: `([^`]+)`",
                           _changelog, re.M)
 _current = re.search(r"^\| v([0-9][^ ]*)（いまの版） \| \[([^\]]+)\]", _readme, re.M)
-check("README の「いまの版」が、変更履歴の最新の版と DOI に合う",
+# 引用欄の表は、版ごとの DOI と公開日を並べる。**行の全部を変更履歴の版の欄と突き合わせる。**
+# 一行だけ見ていると、古い版の DOI が書き換わっても通る。
+_releases = re.findall(r"^## \[([0-9][^\]]*)\] — (\d{4}-\d{2}-\d{2})\n+DOI: `([^`]+)`",
+                       _changelog, re.M)
+
+
+def _release_rows(text, current):
+    """README の版の表を (版, 公開日, DOI) の並びで返す。DOI のリンク先も文字と同じであること。"""
+    rows = re.findall(r"^\| v([0-9][^ ]*?)(?:" + current + r")? \| \[([^\]]+)\]"
+                      r"\(https://doi\.org/([^)]+)\) \| (\d{4}-\d{2}-\d{2}) \| "
+                      r"\[([^\]]+)\]\(CHANGELOG\.md#([^)]+)\) \|$", text, re.M)
+    return [(v, date, doi) for v, doi, href, date, label, anchor in rows
+            if doi == href and label == v
+            and anchor == v.replace(".", "") + "--" + date]
+
+
+_rows_ja = _release_rows(_readme, "（いまの版）")
+check("README の「いまの版」が、変更履歴の最新の版と DOI に合い、版の表の全行が変更履歴の版の欄と合う",
       _current is not None and _released_doi is not None
-      and (_current.group(1), _current.group(2)) == (_released, _released_doi.group(1)),
-      ("README %s %s / 変更履歴 %s %s" % (_current.group(1), _current.group(2), _released,
-                                          _released_doi.group(1) if _released_doi else "?"))
+      and (_current.group(1), _current.group(2)) == (_released, _released_doi.group(1))
+      and len(_releases) > 0 and _rows_ja == [(v, d, doi) for v, d, doi in _releases],
+      ("README %s %s / 変更履歴 %s %s / 表の行 %d が合う、変更履歴の版 %d" % (
+          _current.group(1), _current.group(2), _released,
+          _released_doi.group(1) if _released_doi else "?",
+          sum(a == b for a, b in zip(_rows_ja, _releases)), len(_releases)))
       if _current else "README に「いまの版」の行が見つからない")
 
 # README は宣言に書ける名前を並べ、その数を名乗っている。道具の KNOWN_TABLES と
@@ -529,10 +573,14 @@ check("README が並べる宣言の名前が、道具の KNOWN_TABLES と一致�
 # 古い数を信じる。**版・宣言の名前・名乗る項目数を、日本語の側と同じ物差しで突き合わせる。
 _readme_en = io.open(os.path.join(ROOT, "README.en.md"), encoding="utf-8").read()
 _current_en = re.search(r"^\| v([0-9][^ ]*) \(current\) \| \[([^\]]+)\]", _readme_en, re.M)
-check("英語の README の「current」が、変更履歴の最新の版と DOI に合う",
+check("英語の README の「current」が、変更履歴の最新の版と DOI に合い、版の表の全行が変更履歴の版の欄と合う",
       _current_en is not None and _released_doi is not None
-      and (_current_en.group(1), _current_en.group(2)) == (_released, _released_doi.group(1)),
-      ("README.en %s %s / 変更履歴 %s" % (_current_en.group(1), _current_en.group(2), _released))
+      and (_current_en.group(1), _current_en.group(2)) == (_released, _released_doi.group(1))
+      and _release_rows(_readme_en, r" \(current\)") == [(v, d, doi) for v, d, doi in _releases],
+      ("README.en %s %s / 変更履歴 %s / 表の行 %d が合う、変更履歴の版 %d" % (
+          _current_en.group(1), _current_en.group(2), _released,
+          sum(a == b for a, b in zip(_release_rows(_readme_en, r" \(current\)"), _releases)),
+          len(_releases)))
       if _current_en else "英語の README に「current」の行が見つからない")
 
 _fmt_en = re.search(r"### The declaration format is fixed.*?the following (\d+) names:\s*```\n(.*?)```",
@@ -553,9 +601,25 @@ check("英語の README が名乗る項目数が、日本語の README と同じ
       "日本語 %s / 英語 %s" % (_nums_ja, _nums_en))
 
 _paper_title = re.search(r"^title: '([^']+)'", _paper, re.M).group(1)
-check(".zenodo.json の表題が paper.md と揃っている",
-      _zenodo["title"].startswith(_paper_title),
-      "登録に使われるのはこちらなので、古いままだと手で直した表題が戻る")
+# SUBMIT.md の点検表は、paper.md に JOSS が求める節と語数を「済み」としている。
+# **済みと書いた欄は、paper.md を読めば確かめられる。**節の名前と語数の範囲は
+# SUBMIT.md の側から読み、ここに書き写さない。
+_submit = io.open(os.path.join(ROOT, "SUBMIT.md"), encoding="utf-8").read()
+_sections = re.search(r"^- \[x\] `paper\.md` に、JOSS が求める節がある：(.+)$", _submit, re.M)
+_bounds = re.search(r"^- \[x\] `paper\.md` の本文が (\d+)〜(\d+) 語に収まる", _submit, re.M)
+_rule = re.search(r"^語数は (\d+)〜(\d+) 語と決まっています。", _submit, re.M)
+_body = re.sub(r"<!--.*?-->", "", re.sub(r"^---\n.*?\n---\n", "", _paper, flags=re.S), flags=re.S)
+_words = len(_body.split())
+_wanted = re.findall(r"`([^`]+)`", _sections.group(1)) if _sections else []
+_missing = [h for h in _wanted if not re.search(r"^# " + re.escape(h) + r"$", _body, re.M)]
+check(".zenodo.json の表題が paper.md と揃い、SUBMIT.md の点検表が済みとした節と語数を paper.md が満たす",
+      _zenodo["title"].startswith(_paper_title)
+      and len(_wanted) > 0 and not _missing
+      and _bounds is not None and int(_bounds.group(1)) <= _words <= int(_bounds.group(2))
+      and _rule is not None and _rule.groups() == _bounds.groups(),
+      "語数 %d / 範囲 %s / 欠けた節 %s" % (
+          _words, ("%s〜%s" % _bounds.groups()) if _bounds else "SUBMIT.md に無い",
+          ", ".join(_missing) or ("無し" if _wanted else "SUBMIT.md に節の並びが無い")))
 
 print("\n" + "-" * 58)
 if failures:
