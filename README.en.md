@@ -364,6 +364,11 @@ The author decided what to check: the approach of auditing the errata determinis
 
 Every number the checks report was obtained by running them. No language model is an author. The author (Takuya Nemoto) is responsible for every claim.
 
+| Tool | Used for | Checked by |
+| --- | --- | --- |
+| Claude Code (Anthropic) | `errata_check.py`, `tests/check_tool.py`, `examples/`, the README, `CITATION.cff` | The author (what to check, no inference in the judgement, the declaration format), and `tests/check_tool.py` |
+| Claude (Anthropic) | The translation of this README from the Japanese one | The author |
+
 The commits in this repository are authored as `Claude`, with a `Claude-Session:` trailer at the end identifying the working session. They can be traced with `git log --author=Claude`.
 
 The Zenodo records for v0.1.0 and v0.2.0 do not carry this statement. Files cannot be replaced after publication, so only this side can be corrected (`TL-001` in [self-correction](https://github.com/cpsbvbng26-dotcom/self-correction)).
@@ -382,7 +387,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) (in Japanese). When adding a check, add t
 
 ## Where it is going
 
-It is to be submitted to JOSS (Journal of Open Source Software). It has not been submitted yet. On 10 September 2026 the author decided not to submit it for now; it will not be submitted before 7 March 2027. The paper is [`paper.md`](paper.md); the procedure and the reasons it may not pass are in [`SUBMIT.md`](SUBMIT.md) (in Japanese).
+It is to be submitted to JOSS (Journal of Open Source Software). It has not been submitted yet. On 10 September 2026 the author decided not to submit it for now; it will not be submitted before 7 March 2027. On 11 November 2026 the author decided to submit it together with the code of Sophaxis, in May 2027 or later. The paper is [`paper.md`](paper.md); the procedure and the reasons it may not pass are in [`SUBMIT.md`](SUBMIT.md) (in Japanese).
 
 ---
 
