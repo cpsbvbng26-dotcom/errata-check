@@ -145,6 +145,7 @@ python3 errata_check.py examples/minimal/audit.toml       # 20 項目
 python3 errata_check.py examples/disciplines/audit.toml   # 32 項目
 python3 examples/minimal/build.py && python3 examples/disciplines/build.py
 git diff --exit-code -- examples                   # 見本が作り直せる
+python3 tests/check_hygiene.py          # 依存・権限・固定・秘密・要旨・散文の数（設定は tests/hygiene.toml）
 ```
 
 `examples/*/paper.pdf` と `record.md` は `build.py` の生成物である。手で編集しない。
