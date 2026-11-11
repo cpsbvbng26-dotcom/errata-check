@@ -140,9 +140,9 @@ DOI が付いている（v0.2.0 = 10.5281/zenodo.22649899、v0.1.0 = 10.5281/zen
 ## このリポジトリ
 
 ```
-python3 tests/check_tool.py                        # 道具自身 63 項目
-python3 errata_check.py examples/minimal/audit.toml       # 19 項目
-python3 errata_check.py examples/disciplines/audit.toml   # 31 項目
+python3 tests/check_tool.py                        # 道具自身 82 項目
+python3 errata_check.py examples/minimal/audit.toml       # 20 項目
+python3 errata_check.py examples/disciplines/audit.toml   # 32 項目
 python3 examples/minimal/build.py && python3 examples/disciplines/build.py
 git diff --exit-code -- examples                   # 見本が作り直せる
 ```
