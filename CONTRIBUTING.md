@@ -5,11 +5,14 @@ Issue も pull request も歓迎する。**登録は要らない**（一次資�
 
 ## 不具合を知らせる
 
-<https://github.com/cpsbvbng26-dotcom/errata-check/issues> に立てる。書いてほしいもの。
+<https://github.com/cpsbvbng26-dotcom/errata-check/issues> に立てる。「不具合の報告」の様式
+（`.github/ISSUE_TEMPLATE/bug_report.yml`）が、次のものを必ず書く形になっている。
 
-1. 走らせた宣言（`audit.toml`）の、問題が出た部分
-2. 出た出力（そのまま貼る）
-3. 期待していた出力
+1. 出た出力（そのまま貼る）
+2. 期待していた出力
+3. 再現の手順。走らせたコマンドと、宣言（`audit.toml`）の問題が出た部分
+4. errata-check の版（`--version`）か、写した commit
+5. 環境。OS、Python と pypdf の版、GitHub Action で使ったかどうか
 
 偽陽性はとくに知らせてほしい。この道具は継続的インテグレーションの門として
 使うことを前提にしており、誤って落ちることは、落ちないことより悪い。

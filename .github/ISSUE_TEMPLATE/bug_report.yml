@@ -1,0 +1,55 @@
+name: 不具合の報告 / Bug report
+description: 誤って落ちた、落ちるはずが通った、走らなかった / A check failed wrongly, passed wrongly, or the tool did not run
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        日本語でも英語でも書けます。issue は公開されます。個人の情報や、公開していない原稿は貼らないこと。
+        Write in Japanese or English. Issues are public: do not paste personal data or unpublished manuscripts.
+  - type: textarea
+    id: what
+    attributes:
+      label: 起きたこと / What happened
+      description: 誤って落ちた（偽陽性）、落ちるはずが通った（偽陰性）、走らなかった、のどれか。出た出力をそのまま貼ります。 / A false failure, a missed failure, or a crash. Paste the output as it is.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待していたこと / What was expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現の手順 / Steps to reproduce
+      description: 走らせたコマンドと、宣言（audit.toml）の問題が出た部分。一次資料が公開されていれば、その所在。 / The command, and the part of the declaration (audit.toml) that shows the problem. Where the primary source is, if it is public.
+      placeholder: |
+        python3 errata_check.py audit.toml
+
+        [[quote]]
+        source = "paper"
+        text = "..."
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: errata-check の版 / Version of errata-check
+      description: "`python3 errata_check.py --version` の出力、または写した commit の SHA / The output of `python3 errata_check.py --version`, or the commit SHA you copied"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 環境 / Environment
+      description: OS、Python の版（`python3 --version`）、pypdf の版（`python3 -c "import pypdf; print(pypdf.__version__)"`）、GitHub Action で使ったかどうか / OS, Python version, pypdf version, and whether it ran as the GitHub Action
+      placeholder: |
+        OS: Ubuntu 24.04
+        Python: 3.12.3
+        pypdf: 5.1.0
+        GitHub Action: no
+    validations:
+      required: true
