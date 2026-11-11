@@ -9,7 +9,7 @@
 凍結された公開物に対して、正誤表のほうを機械で監査します。
 
 DOI が付いて公開された PDF は、もう直せません。直せるのは正誤表のほうです。
-だから正誤表は、時間とともに一次資料からずれていく。
+だから正誤表は、時間とともに一次資料からずれていきます。
 
 - 引用が一字変わる
 - 箇所を数え落とす
@@ -219,7 +219,7 @@ any_pattern = "(\\d{4})年(\\d{1,2})月(\\d{1,2})日"
 
 ### 宣言の書式は固定する
 
-0.4.0 から、宣言の最上位に書ける表と鍵の名前を固定します。次の 17 個です。
+次の版（0.4.0 の予定）から、宣言の最上位に書ける表と鍵の名前を固定します。次の 17 個です。
 
 ```
 root  source  document  quote  count  absent  number  statistic  grim
@@ -246,9 +246,9 @@ python3 errata_check.py examples/minimal/audit.toml     # 20 項目
 
 ## 空白の扱い
 
-PDF から取り出した文字列は、改行や空白の入り方が処理系で変わる。
+PDF から取り出した文字列は、改行や空白の入り方が処理系で変わります。
 比較の前に `NFKC` をかけ、幅ゼロの文字を落とし、空白の連なりを一つに潰します。
-文字そのものは置き換えません。だから「引用が一字違う」は落ちるが、
+文字そのものは置き換えません。だから「引用が一字違う」は落ちますが、
 「行が折り返された」では落ちません。
 
 ## GitHub Action として使う
@@ -302,7 +302,7 @@ ORCID を一桁変える、ISBN を一桁変える、内訳の和を崩す、和
 
 ## これは何ではないか
 
-既にあるものと混同しないために書いておく。
+既にあるものと混同しないために書いておきます。
 
 | 既存 | 何をするか | この道具との違い |
 | --- | --- | --- |
@@ -402,8 +402,9 @@ Zenodo に登録した v0.1.0 と v0.2.0 のレコードには、この記載が
 
 ## 出す先
 
-JOSS（Journal of Open Source Software）に出します。論文は [`paper.md`](paper.md)、
-手順と、通らない見込みは [`SUBMIT.md`](SUBMIT.md) にあります。結果はまだ出ていません。
+JOSS（Journal of Open Source Software）に出す予定です。まだ出していません。
+2026年9月10日に、いまは出さないと決めました。出すのは、早くても 2027年3月7日より後です。
+論文は [`paper.md`](paper.md)、手順と、通らない見込みは [`SUBMIT.md`](SUBMIT.md) にあります。
 
 ---
 
@@ -414,5 +415,7 @@ JOSS（Journal of Open Source Software）に出します。論文は [`paper.md`
 ## 使われている場所
 
 - [trinity-infinity](https://github.com/cpsbvbng26-dotcom/trinity-infinity) —— 著者本人による、自分の三篇の正誤表の監査
+- [autonomy-and-self-cultivation](https://github.com/cpsbvbng26-dotcom/autonomy-and-self-cultivation) —— 著者本人による、哲学の三篇の正誤表の監査
+- [naval-gazette-notes](https://github.com/cpsbvbng26-dotcom/naval-gazette-notes) —— 著者本人による、史料の注の正誤表の監査
 
 責任の範囲は、[免責事項](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.md)に定めています。
