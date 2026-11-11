@@ -29,6 +29,41 @@
 写して使っている `autonomy-and-self-cultivation` と `naval-gazette-notes` は
 その版を指しています。版と番号が対応しているので、書き換えません。
 
+## 出す前の点検表
+
+この文書が引いている JOSS の規程（「受け付け前の四つの関門」と「原文を読んで直したもの」）を、
+一行ずつの点検に直したもの。`[x]` は済み、`[ ]` はまだ。出すのは早くても 2027年3月7日より後。
+
+関門（`docs/submitting.md` の「Pre-review screening criteria」）
+
+- [ ] 関門 1：公開の開発履歴が六か月を超えている。2027年3月7日までは満たさない。コミットが数日に集中していないこと
+- [x] 関門 2：研究に使われている証拠。三つのリポジトリで、凍結された成果物の正誤表を CI で監査している
+- [ ] 関門 3：開かれた開発の実践。リリース・試験・CI・文書・`CONTRIBUTING.md`・支えの範囲・変更履歴・不具合報告の様式はある。続いたコミットがまだ足りない
+- [ ] 関門 4：時間をかけた反復。2026年9月18日より後は、変更をすべて pull request で残している。反復の記録として読める長さにはまだ足りない
+
+論文（`paper.md` と `paper.bib`）
+
+- [x] `paper.md` に、JOSS が求める節がある：`Summary`・`Statement of need`・`State of the field`・`Software design`・`Research impact statement`・`AI usage disclosure`・`References`
+- [x] `paper.md` の本文が 750〜1750 語に収まる
+- [x] 外部の採用が無いことを、`Research impact statement` に書いてある
+- [x] 言語モデルの利用を、`AI usage disclosure` に規程が求める三点で書いてある。言語モデルを著者にしていない
+
+リポジトリ
+
+- [x] OSI 承認のライセンス（MIT、`LICENSE`）
+- [x] その言語の慣行に沿った梱包（`pyproject.toml`）
+- [x] タグ付きのリリースと保管先の DOI（`v0.3.0`、`10.5281/zenodo.22685687`）
+- [ ] 版の番号が、タグの中でも揃っている。`v0.3.0` のタグの中の `CITATION.cff` は `0.2.0` のまま（self-correction の `TL-002`）。次の版で揃える。リリースは利用者が切る
+- [x] 試験と CI（`tests/check_tool.py`、`.github/workflows/verify.yml`）
+- [x] 変更履歴（`CHANGELOG.md`）と、手を入れるときの文書（`CONTRIBUTING.md`）
+
+出す日
+
+- [ ] 2027年3月7日より後であること。日付は必要条件であって十分条件ではない（下の「いつ出すか」）
+
+`paper.md` の節と語数の二行は、`tests/check_tool.py` が `paper.md` を読んで確かめている。
+節の名前と語数の範囲は、この表から読む。
+
 ## 版の番号について
 
 `v0.2.0` のタグから 87 行離れたまま、`__version__` は `0.2.0` を名乗っていました。
