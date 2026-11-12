@@ -1,5 +1,6 @@
 # 変更履歴
 
+errata-check の版ごとの変更を記録した履歴です。
 この形式は [Keep a Changelog](https://keepachangelog.com/) に沿います。
 版の番号は [Semantic Versioning](https://semver.org/) に従います。
 

@@ -8,7 +8,7 @@ Type: Software · Status: In revision
 
 **English** ｜ [日本語](README.md)
 
-Machine auditing of an errata document against a frozen, already-published artifact.
+errata-check is a tool for machine auditing of an errata document against a frozen, already-published artifact.
 
 Once a PDF has been published with a DOI, it can no longer be revised. Only the errata can. That is why the errata drifts away from the primary source over time:
 
