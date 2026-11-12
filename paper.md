@@ -175,5 +175,7 @@ responsible for the accuracy, originality and licensing of all submitted materia
 
 No financial support was received for this work, and no sponsor had any
 involvement in it. The author declares no conflicts of interest.
+`errata-check` is not a project of ZEN University, and the university does
+not endorse it.
 
 # References

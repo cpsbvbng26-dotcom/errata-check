@@ -632,14 +632,40 @@ _body = re.sub(r"<!--.*?-->", "", re.sub(r"^---\n.*?\n---\n", "", _paper, flags=
 _words = len(_body.split())
 _wanted = re.findall(r"`([^`]+)`", _sections.group(1)) if _sections else []
 _missing = [h for h in _wanted if not re.search(r"^# " + re.escape(h) + r"$", _body, re.M)]
-check(".zenodo.json の表題が paper.md と揃い、SUBMIT.md の点検表が済みとした節と語数を paper.md が満たす",
+# 2026-11-12（三度目の見落とし）。所属は著者の在籍先として ZEN University, Japan の一つだけを書く。
+# JOSS の論文の手引きは、著者とその所属の一覧を求める。所属を書くと、道具が大学の仕事か、
+# 大学が認めたものと読まれうる。本文に、大学の仕事ではなく、大学が認めてもいないと一文で書く。
+# 肩書きは書かない。壊した写しで落ちることも、ここで見る。
+_AFFIL = "affiliations:\n  - name: ZEN University, Japan\n    index: 1\n"
+_NOT_UNIV = "`errata-check` is not a project of ZEN University, and the university does not endorse it."
+
+
+def _affil_ok(paper):
+    head = re.match(r"^---\n(.*?)\n---\n", paper, re.S)
+    body = re.sub(r"<!--.*?-->", "", paper[head.end():] if head else "", flags=re.S)
+    return (head is not None and _AFFIL in paper
+            and len(re.findall(r"^  - name:", head.group(1), re.M)) == 2
+            and _NOT_UNIV in " ".join(body.split()))
+
+
+_affil_breaks = [
+    _paper.replace("`errata-check` is not a project", "`errata-check` is a project"),
+    _paper.replace("the university does\nnot endorse it.", "the university endorses it."),
+    _paper.replace("  - name: ZEN University, Japan\n", "  - name: ZEN University, Japan\n    index: 1\n  - name: Independent\n"),
+    _paper.replace(_AFFIL, ""),
+]
+check(".zenodo.json の表題が paper.md と揃い、SUBMIT.md の点検表が済みとした節と語数を paper.md が満たし、"
+      "所属は ZEN University, Japan の一つだけで、本文が大学の仕事ではなく大学が認めてもいないと書く（壊した写しでは落ちる）",
       _zenodo["title"].startswith(_paper_title)
       and len(_wanted) > 0 and not _missing
       and _bounds is not None and int(_bounds.group(1)) <= _words <= int(_bounds.group(2))
-      and _rule is not None and _rule.groups() == _bounds.groups(),
-      "語数 %d / 範囲 %s / 欠けた節 %s" % (
+      and _rule is not None and _rule.groups() == _bounds.groups()
+      and _affil_ok(_paper) and all(b != _paper and not _affil_ok(b) for b in _affil_breaks),
+      "語数 %d / 範囲 %s / 欠けた節 %s / 所属の一文 %s / 壊した写しで落ちる %s" % (
           _words, ("%s〜%s" % _bounds.groups()) if _bounds else "SUBMIT.md に無い",
-          ", ".join(_missing) or ("無し" if _wanted else "SUBMIT.md に節の並びが無い")))
+          ", ".join(_missing) or ("無し" if _wanted else "SUBMIT.md に節の並びが無い"),
+          "有り" if _affil_ok(_paper) else "無し",
+          sum(1 for b in _affil_breaks if b != _paper and not _affil_ok(b))))
 
 print("\n" + "-" * 58)
 if failures:
