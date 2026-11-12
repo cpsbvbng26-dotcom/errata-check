@@ -395,6 +395,8 @@ It is to be submitted to JOSS (Journal of Open Source Software). It has not been
 
 [MIT](LICENSE). © 2026 Takuya Nemoto
 
+Texts by others that this repository quotes, or keeps to verify its quotations, are not licensed under CC BY 4.0 or the MIT License and remain their owners'.
+
 ## Where it is used
 
 - [trinity-infinity](https://github.com/cpsbvbng26-dotcom/trinity-infinity): the author's audit of the errata for the author's own three papers

@@ -448,6 +448,8 @@ JOSS（Journal of Open Source Software）に出す予定です。まだ出して
 
 [MIT](LICENSE)。© 2026 根本卓哉（Takuya Nemoto）
 
+このリポジトリが引き、または引用を確かめるために置いている他人の文は、CC BY 4.0 でも MIT でも許諾しておらず、それぞれの権利者のものです。
+
 ## 使われている場所
 
 - [trinity-infinity](https://github.com/cpsbvbng26-dotcom/trinity-infinity) —— 著者本人による、自分の三篇の正誤表の監査
