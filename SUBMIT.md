@@ -56,7 +56,7 @@
 - [x] OSI 承認のライセンス（MIT、`LICENSE`）
 - [x] その言語の慣行に沿った梱包（`pyproject.toml`）
 - [x] タグ付きのリリースと保管先の DOI（`v0.3.0`、`10.5281/zenodo.22685687`）
-- [ ] 版の番号が、タグの中でも揃っている。`v0.3.0` のタグの中の `CITATION.cff` は `0.2.0` のまま（self-correction の `TL-002`）。次の版で揃える。リリースは利用者が切る
+- [ ] 版の番号が、タグの中でも揃っている。`v0.3.0` のタグの中の `CITATION.cff` は `0.2.0` のまま（self-correction の `TL-002`）。次の版で揃える。リリースは作業環境から切れない（タグの push は 403）
 - [x] 試験と CI（`tests/check_tool.py`、`.github/workflows/verify.yml`）
 - [x] 変更履歴（`CHANGELOG.md`）と、手を入れるときの文書（`CONTRIBUTING.md`）
 
