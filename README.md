@@ -454,4 +454,4 @@ JOSS（Journal of Open Source Software）に出す予定です。まだ出して
 - [autonomy-and-self-cultivation](https://github.com/cpsbvbng26-dotcom/autonomy-and-self-cultivation) —— 著者本人による、哲学の三篇の正誤表の監査
 - [naval-gazette-notes](https://github.com/cpsbvbng26-dotcom/naval-gazette-notes) —— 著者本人による、史料の注の正誤表の監査
 
-責任の範囲は、[免責事項](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.md)に定めています。
+責任は、法令の定めるとおりです。説明は[免責事項](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.md)にあります。
