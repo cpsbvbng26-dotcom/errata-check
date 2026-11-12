@@ -401,4 +401,4 @@ It is to be submitted to JOSS (Journal of Open Source Software). It has not been
 - [autonomy-and-self-cultivation](https://github.com/cpsbvbng26-dotcom/autonomy-and-self-cultivation): the author's audit of the errata for the author's three papers in philosophy
 - [naval-gazette-notes](https://github.com/cpsbvbng26-dotcom/naval-gazette-notes): the author's audit of the errata for an archival source note
 
-The extent of liability is set out in the [Disclaimer](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.en.md).
+Liability is as the law provides; the [Disclaimer](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.en.md) explains it.
