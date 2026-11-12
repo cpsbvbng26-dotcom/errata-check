@@ -2,7 +2,7 @@ name: PyPI に公開
 
 # Release を公開したときに、そのタグから組んで PyPI へ出す。手で起こすこともできる。
 # 鍵は置かない。PyPI の trusted publishing で、この workflow と環境 pypi だけに許す。
-# PyPI 側の登録は利用者が行う（プロジェクトの Publishing に、この workflow の名を書く）。
+# PyPI 側の登録（プロジェクトの Publishing に、この workflow の名を書くこと）は、作業環境から届かない。
 #
 # タグの版と pyproject.toml の版が違えば出さない。v0.3.0 のタグには pyproject.toml が
 # 無いので、その版はここからは出せない（self-correction の TL-002）。
