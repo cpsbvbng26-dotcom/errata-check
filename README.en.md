@@ -403,4 +403,15 @@ Texts by others that this repository quotes, or keeps to verify its quotations, 
 - [autonomy-and-self-cultivation](https://github.com/cpsbvbng26-dotcom/autonomy-and-self-cultivation): the author's audit of the errata for the author's three papers in philosophy
 - [naval-gazette-notes](https://github.com/cpsbvbng26-dotcom/naval-gazette-notes): the author's audit of the errata for an archival source note
 
+## Statement of Purpose
+
+<!-- statement:start -->
+This repository is covered by the [Statement of Purpose](https://cpsbvbng26-dotcom.vercel.app/notes/mission.en.html) of Takuya Nemoto.
+The statement sets out how the operator approaches running these places. By itself it creates no right or obligation for the operator, for readers or for anyone else.
+What applies is this repository's licence and, for the repositories listed in the [Disclaimer](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.en.md), that Disclaimer. Where the statement and they differ, they prevail.
+The operator has not, at present, retained a lawyer or other professional. The statement and the Disclaimer have not been reviewed by a lawyer.
+If a dispute arises, the operator will respond after consulting a lawyer or other professional where needed, following the laws of Japan (including their rules on international jurisdiction and on the governing law). This is not a warning to anyone.
+The full text is on [the site](https://cpsbvbng26-dotcom.vercel.app/notes/mission.en.html) and in [docs/mission.en.md](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/docs/mission.en.md) of cpsbvbng26-dotcom.
+<!-- statement:end -->
+
 Liability is as the law provides; the [Disclaimer](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.en.md) explains it.

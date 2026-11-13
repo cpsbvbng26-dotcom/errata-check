@@ -456,4 +456,15 @@ JOSS（Journal of Open Source Software）に出す予定です。まだ出して
 - [autonomy-and-self-cultivation](https://github.com/cpsbvbng26-dotcom/autonomy-and-self-cultivation) —— 著者本人による、哲学の三篇の正誤表の監査
 - [naval-gazette-notes](https://github.com/cpsbvbng26-dotcom/naval-gazette-notes) —— 著者本人による、史料の注の正誤表の監査
 
+## 運営理念・声明
+
+<!-- 声明:ここから -->
+このリポジトリには、根本卓哉の[運営理念・声明](https://cpsbvbng26-dotcom.vercel.app/notes/mission.html)が掛かります。
+声明は、運営の考え方を述べたものです。それ自体で、運営者にも、読む人その他の誰にも、権利や義務を生じさせません。
+適用されるのは、このリポジトリのライセンスと、[免責事項](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.md)が挙げるリポジトリではその免責事項です。声明とそれらが食い違うときは、それらが優先します。
+運営者は、現在、弁護士その他の専門家に依頼していません。声明と免責事項は、弁護士の確認を受けていません。
+紛争が生じたときは、運営者は、必要に応じて弁護士その他の専門家に相談したうえで、日本の法令（国際的な事件の裁判管轄と準拠法についての定めを含む）に沿って対応します。これは、誰かに対する警告ではありません。
+全文は、[サイトの頁](https://cpsbvbng26-dotcom.vercel.app/notes/mission.html)と、cpsbvbng26-dotcom の [docs/mission.md](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/docs/mission.md) にあります。
+<!-- 声明:ここまで -->
+
 責任は、法令の定めるとおりです。説明は[免責事項](https://github.com/cpsbvbng26-dotcom/cpsbvbng26-dotcom/blob/main/DISCLAIMER.md)にあります。
