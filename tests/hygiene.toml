@@ -6,7 +6,8 @@ packages = ["pypdf", "build", "twine"]
 
 # 書き込みの権限。「ワークフローのファイル名:権限」。
 # PyPI の trusted publishing が id-token を要る。publish の仕事にだけ渡している。
-writes = ["pypi.yml:id-token"]
+# 2026-11-14：突き合わせの受付（checked-intake.yml）は、誤りの知らせにラベルを付けて閉じるので、issue に書く。13 のリポジトリで同じファイル。
+writes = ["pypi.yml:id-token", "checked-intake.yml:issues"]
 
 # 要旨。日本語は CITATION.cff、英語は .zenodo.json に置いている。
 [abstract]
