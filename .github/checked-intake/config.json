@@ -16,5 +16,7 @@
   "blob": "https://github.com/cpsbvbng26-dotcom/errata-check",
   "dois": {},
   "ids": [],
-  "neverClose": []
+  "neverClose": [
+    "needs a person"
+  ]
 }
