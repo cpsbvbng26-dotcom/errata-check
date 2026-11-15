@@ -4,6 +4,13 @@
 # build と twine は PyPI に出すときの組み立てと点検に使う。
 packages = ["pypdf", "build", "twine"]
 
+# PyPI に出すときだけ、build と twine とその依存を、版とハッシュで固めた一覧（.github/requirements-pypi.txt）から入れる（2026-11-15）。
+# ここに挙げるのは、その一覧にだけ現れる依存の名である。ほかの所では使わない。setuptools は、隔てた環境を作らずに組むために要る。
+transitive = ["certifi", "cffi", "charset-normalizer", "cryptography", "docutils", "id", "idna", "jaraco.classes", "jaraco.context", "jaraco.functools", "jeepney", "keyring", "markdown-it-py", "mdurl", "more-itertools", "nh3", "packaging", "pycparser", "Pygments", "pyproject_hooks", "readme_renderer", "requests", "requests-toolbelt", "rfc3986", "rich", "SecretStorage", "setuptools", "urllib3"]
+
+# 長い仕事の時間の上限（既定は 60 分）。Software Heritage は、保存を頼んだあと、写しができるまで待つ。
+long_jobs = ["swh-save.yml:save=150"]
+
 # 書き込みの権限。「ワークフローのファイル名:権限」。
 # PyPI の trusted publishing が id-token を要る。publish の仕事にだけ渡している。
 # 2026-11-14：突き合わせの受付（checked-intake.yml）は、誤りの知らせにラベルとコメントを付けるので、issue に書く（2026-11-15 から閉じない）。13 のリポジトリで同じファイル。
