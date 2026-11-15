@@ -14,11 +14,14 @@ jobs:
   verify:
     name: 道具自身 82 項目 / 見本 20 + 32 + 24 項目
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       matrix:
         python-version: ['3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: ${{ matrix.python-version }}
@@ -44,8 +47,11 @@ jobs:
   action:
     name: Action として使える（通る見本は通り、壊した写しは落ちる）
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: 見本が通る
         uses: ./
         with:
