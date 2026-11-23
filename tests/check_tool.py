@@ -514,28 +514,161 @@ _stdlib_detail = ("標準ライブラリの外: %s / dependencies = [] %s / pdf 
                      "有り" if _pdf_extra else "無し")) if _STDLIB is not None \
     else "sys.stdlib_module_names が無い（Python 3.10 以降で走らせる）"
 
-for rel, pattern, text, extra, extra_label in [
-        ("pyproject.toml", r'^version = "([^"]+)"', _pyproject, _stdlib_only,
-         "。依存は無く、道具が読むのは標準ライブラリと PDF のときの pypdf だけである"),
-        ("CITATION.cff", r"^version: (\S+)", _citation, True, ""),
-        ("CHANGELOG.md", r"^## \[([0-9][^\]]*)\]", _changelog, True, "")]:
-    m = re.search(pattern, text, re.M)
+# ------------------------------------------------- 版を切るコミットの形（2026-11-23）
+#
+# **v0.3.0 のタグの中の CITATION.cff は 0.2.0 を名乗ったままだった（self-correction の TL-002）。**
+# タグを切るのは運営者のアカウントで、作業環境からは切れない。だから、タグが指すコミットそのものが
+# 揃っていなければならない。そのコミットには、自分の版の DOI がまだ無い（Zenodo は Release のあとに付ける）。
+# 決めた形は二つだけである。SUBMIT.md の「版の番号について」に、決めたことと理由を書いてある。
+#
+#   版と版のあいだ  四か所は最後に出した版を名乗る。CITATION.cff の date-released と doi、pyproject.toml の
+#                   Archive は、変更履歴のその版の欄の日付と DOI に合う。変更は「## 未リリース」に溜める。
+#   版を切るコミット  四か所が新しい版を名乗る。変更履歴のいちばん上の版の欄は、DOI の行の代わりに
+#                   RELEASE_MARKER を持つ。CITATION.cff に doi は無く、pyproject.toml に Archive は無い。
+#                   ほかの版の欄は、どれも DOI を持つ。
+#
+# 出していない版の番号を、版と版のあいだに名乗らない。名乗れば、出していない版を出したと書くことになる。
+RELEASE_MARKER = "DOI: 未付与（Release と Zenodo の版ができたあとに、受け取った番号をここに書きます）"
+
+
+def _releases_of(changelog):
+    """変更履歴の版の欄のうち、DOI のあるものを (版, 公開日, DOI) の並びで返す。"""
+    return re.findall(r"^## \[([0-9][^\]]*)\] — (\d{4}-\d{2}-\d{2})\n+DOI: `([^`]+)`", changelog, re.M)
+
+
+def version_problems(tool_src, pyproject, citation, changelog):
+    """版を書いている四か所が、変更履歴の版の欄と同じ一つの版を指すかを見る。食い違いを場所ごとに返す。"""
+    p = {"pyproject.toml": [], "CITATION.cff": [], "CHANGELOG.md": []}
+    m = re.search(r'^__version__ = "([^"]+)"$', tool_src, re.M)
+    ver = m.group(1) if m else None
+    heads = re.findall(r"^## \[([0-9][^\]]*)\] — (\d{4}-\d{2}-\d{2})\n\n([^\n]*)$", changelog, re.M)
+    if len(re.findall(r"^## \[", changelog, re.M)) != len(heads) or not heads:
+        p["CHANGELOG.md"].append("版の欄の見出しが「## [版] — 日付」と空行と DOI の行の形でない")
+        return p
+    if len(re.findall(r"^## 未リリース$", changelog, re.M)) > 1:
+        p["CHANGELOG.md"].append("「## 未リリース」が二つある")
+    dois = {}
+    for i, (v, d, line) in enumerate(heads):
+        mm = re.fullmatch(r"DOI: `(10\.\d{4,9}/\S+)`", line)
+        if mm:
+            dois[v] = mm.group(1)
+        elif i == 0 and line == RELEASE_MARKER:
+            dois[v] = None
+        else:
+            p["CHANGELOG.md"].append("%s の欄の DOI の行が決めた形でない（%s）" % (v, line[:30]))
+    top, top_date = heads[0][0], heads[0][1]
+    want = dois.get(top)
+    if ver != top:
+        p["CHANGELOG.md"].append("いちばん上の版 %s / __version__ %s" % (top, ver))
+    mv = re.search(r'^version = "([^"]+)"$', pyproject, re.M)
+    if not mv or mv.group(1) != ver:
+        p["pyproject.toml"].append("版 %s / __version__ %s" % (mv.group(1) if mv else "無し", ver))
+    arch = re.findall(r'^Archive = "([^"]*)"$', pyproject, re.M)
+    if arch != (["https://doi.org/" + want] if want else []):
+        p["pyproject.toml"].append("Archive %s / 版の DOI %s" % (",".join(arch) or "無し", want or "まだ無い"))
+    cv = re.search(r'^version: "?([^"\s]+)"?$', citation, re.M)
+    if not cv or cv.group(1) != ver:
+        p["CITATION.cff"].append("version %s / __version__ %s" % (cv.group(1) if cv else "無し", ver))
+    cd = re.search(r'^date-released: "?(\d{4}-\d{2}-\d{2})"?$', citation, re.M)
+    if not cd or cd.group(1) != top_date:
+        p["CITATION.cff"].append("date-released %s / 変更履歴 %s" % (cd.group(1) if cd else "無し", top_date))
+    ctop = re.findall(r"^doi: (\S+)$", citation, re.M)
+    if ctop != ([want] if want else []):
+        p["CITATION.cff"].append("doi %s / 版の DOI %s" % (",".join(ctop) or "無し", want or "まだ無い"))
+    ids = re.findall(r"^  - type: doi\n    value: (\S+)\n    description: v(\S+) ", citation, re.M)
+    if len(re.findall(r"^  - type: doi$", citation, re.M)) != len(ids):
+        p["CITATION.cff"].append("identifiers の DOI に、どの版のものかの名乗りが無い")
+    for val, v in ids:
+        if dois.get(v) != val:
+            p["CITATION.cff"].append("identifiers の v%s の DOI %s / 変更履歴 %s" % (v, val, dois.get(v)))
+    if want and (want, top) not in ids:
+        p["CITATION.cff"].append("identifiers に v%s の DOI が無い" % top)
+    return p
+
+
+def bump(tool_src, pyproject, citation, new):
+    """版を書く三か所（変更履歴の外）の版の番号だけを new にする。"""
+    old = re.search(r'^__version__ = "([^"]+)"$', tool_src, re.M).group(1)
+    return (tool_src.replace('__version__ = "%s"' % old, '__version__ = "%s"' % new),
+            pyproject.replace('version = "%s"' % old, 'version = "%s"' % new),
+            re.sub(r'^version: .*$', "version: %s" % new, citation, flags=re.M))
+
+
+def release_commit(tool_src, pyproject, citation, changelog, new, date):
+    """版を切るコミットを、いまの中身から作る。決めた形をそのとおりに当てたもの。
+    「## 未リリース」が無ければ、いちばん上の版の欄の前に新しい欄を置く。"""
+    t, p, c = bump(tool_src, pyproject, citation, new)
+    head = "## [%s] — %s\n\n%s\n" % (new, date, RELEASE_MARKER)
+    log = (changelog.replace("## 未リリース\n", head, 1) if "\n## 未リリース\n" in changelog
+           else re.sub(r"^## \[", lambda m: head + "\n## [", changelog, count=1, flags=re.M))
+    return (t, re.sub(r'^Archive = .*\n', "", p, flags=re.M),
+            re.sub(r'^doi: .*\n', "", re.sub(r'^date-released: .*$', 'date-released: "%s"' % date, c, flags=re.M),
+                   flags=re.M),
+            log)
+
+
+def with_doi(pyproject, citation, doi):
+    """CITATION.cff の doi と pyproject.toml の Archive を、doi を指す一行にする（無ければ置く）。"""
+    c = re.sub(r'^doi: .*\n', "", citation, flags=re.M)
+    c = re.sub(r'^(version: )', "doi: %s\n\\1" % doi, c, count=1, flags=re.M)
+    p = re.sub(r'^Archive = .*\n', "", pyproject, flags=re.M)
+    p = re.sub(r'^(Repository = .*\n)', '\\1Archive = "https://doi.org/%s"\n' % doi, p, count=1, flags=re.M)
+    return p, c
+
+
+_VP = version_problems(TOOL_SRC, _pyproject, _citation, _changelog)
+_REAL = (TOOL_SRC, _pyproject, _citation, _changelog)
+# いちばん上の版の欄が決めた一文を持つなら、いまが版を切るコミットである。そうでなければ、いまの中身から作る。
+_TOP_LINE = re.search(r"^## \[[^\]]*\] — [^\n]*\n\n([^\n]*)$", _changelog, re.M)
+_RC = (_REAL if _TOP_LINE and _TOP_LINE.group(1) == RELEASE_MARKER
+       else release_commit(TOOL_SRC, _pyproject, _citation, _changelog, "9.9.9", "2099-12-31"))
+_PREV_DOI = _releases_of(_changelog)[1][2]
+_DATE = re.search(r'^date-released: "?(\d{4}-\d{2}-\d{2})"?$', _citation, re.M).group(1)
+# 壊した写し。どれも、決めた二つの形のどちらにも当たらない。版と日付と DOI は、いまの中身から取る。
+# 版と版のあいだでも、版を切るコミットの中でも、同じ写しが作れるように書く。
+_version_breaks = [
+    ("CITATION.cff の date-released を変更履歴と違えて書く",
+     (TOOL_SRC, _pyproject, _citation.replace(_DATE, "2099-01-01"), _changelog)),
+    ("CITATION.cff の doi を前の版の DOI にする",
+     (TOOL_SRC, _pyproject, with_doi(_pyproject, _citation, _PREV_DOI)[1], _changelog)),
+    ("pyproject.toml の Archive を前の版の DOI にする",
+     (TOOL_SRC, with_doi(_pyproject, _citation, _PREV_DOI)[0], _citation, _changelog)),
+    ("identifiers の版の名乗りを別の版にする",
+     (TOOL_SRC, _pyproject, re.sub(r"description: v\S+ の版 DOI", "description: v9.9.8 の版 DOI", _citation),
+      _changelog)),
+    ("変更履歴に欄を作らずに、ほかの三か所の版だけを上げる",
+     bump(TOOL_SRC, _pyproject, _citation, "9.9.7") + (_changelog,)),
+    ("版を切るコミットで、CITATION.cff に前の版の doi を残す",
+     (_RC[0], _RC[1], with_doi(_RC[1], _RC[2], _PREV_DOI)[1], _RC[3])),
+    ("版を切るコミットで、pyproject.toml に前の版の Archive を残す",
+     (_RC[0], with_doi(_RC[1], _RC[2], _PREV_DOI)[0], _RC[2], _RC[3])),
+    ("版を切るコミットの DOI の行を、決めた文と違えて書く",
+     (_RC[0], _RC[1], _RC[2], _RC[3].replace(RELEASE_MARKER, "DOI: 未付与"))),
+    ("二つ目の DOI のある版の欄から DOI の行を消す",
+     (TOOL_SRC, _pyproject, _citation, _changelog.replace("\nDOI: `%s`\n" % _PREV_DOI, "\n", 1))),
+]
+# 写しが元とも版を切るコミットとも違うこと（置き換えが空振りすれば、壊したことにならない）。
+_version_break_ok = sum(1 for _, args in _version_breaks
+                        if args != _REAL and args != _RC and any(version_problems(*args).values()))
+_rc_problems = version_problems(*_RC)
+
+for rel, extra, extra_label in [
+        ("pyproject.toml", _stdlib_only,
+         "。依存は無く、道具が読むのは標準ライブラリと PDF のときの pypdf だけである。Archive は名乗る版の DOI を指す"),
+        ("CITATION.cff", True, "。date-released と doi と identifiers も、変更履歴のその版の欄と合う"),
+        ("CHANGELOG.md", not any(_rc_problems.values()) and _version_break_ok == len(_version_breaks),
+         "。版を切るコミットの形も通り、決めた二つの形に当たらない写し %d 通りは落ちる" % len(_version_breaks))]:
     check("%s の版が __version__ と合う%s" % (rel, extra_label),
-          m is not None and m.group(1).strip('"') == VERSION and extra,
-          (("名乗り %s / 実際 %s" % (m.group(1), VERSION)) if m else "版の記述が見つからない")
-          + ("" if extra else "  " + _stdlib_detail))
+          not _VP[rel] and extra,
+          (" / ".join(_VP[rel]) or "版 %s" % VERSION)
+          + ("" if rel != "pyproject.toml" or _stdlib_only else "  " + _stdlib_detail)
+          + ("" if rel != "CHANGELOG.md" else "  版を切るコミット %s / 落ちた写し %d / %d" % (
+              " / ".join(sum(_rc_problems.values(), [])) or "通る", _version_break_ok, len(_version_breaks))))
 
 # README の引用欄も版を名乗っている。**v0.3.0 を出したあとも「v0.2.0（いまの版）」の
 # まま 19 日残っていた。**上の四つと違ってどの検査も見ていなかったので、誰も気付かなかった。
 _readme = io.open(os.path.join(ROOT, "README.md"), encoding="utf-8").read()
-_released = re.search(r"^## \[([0-9][^\]]*)\]", _changelog, re.M).group(1)
-_released_doi = re.search(r"^## \[" + re.escape(_released) + r"\][^\n]*\n+DOI: `([^`]+)`",
-                          _changelog, re.M)
-_current = re.search(r"^\| v([0-9][^ ]*)（いまの版） \| \[([^\]]+)\]", _readme, re.M)
-# 引用欄の表は、版ごとの DOI と公開日を並べる。**行の全部を変更履歴の版の欄と突き合わせる。**
-# 一行だけ見ていると、古い版の DOI が書き換わっても通る。
-_releases = re.findall(r"^## \[([0-9][^\]]*)\] — (\d{4}-\d{2}-\d{2})\n+DOI: `([^`]+)`",
-                       _changelog, re.M)
+_readme_en = io.open(os.path.join(ROOT, "README.en.md"), encoding="utf-8").read()
 
 
 def _release_rows(text, current):
@@ -548,16 +681,25 @@ def _release_rows(text, current):
             and anchor == v.replace(".", "") + "--" + date]
 
 
-_rows_ja = _release_rows(_readme, "（いまの版）")
+def readme_release(readme, changelog, current):
+    """README の「いまの版」が DOI のある最新の版を指し、版の表の全行が変更履歴の版の欄と合うか。
+    版を切るコミットでは、いちばん上の版に DOI がまだ無い。README はその間、DOI のある版だけを並べる。"""
+    rels = _releases_of(changelog)
+    cur = re.search(r"^\| v([0-9][^ ]*)" + current + r" \| \[([^\]]+)\]", readme, re.M)
+    rows = _release_rows(readme, current)
+    ok = (cur is not None and len(rels) > 0 and (cur.group(1), cur.group(2)) == (rels[0][0], rels[0][2])
+          and rows == rels)
+    detail = ("README %s %s / 変更履歴 %s %s / 表の行 %d が合う、変更履歴の版 %d" % (
+        cur.group(1), cur.group(2), rels[0][0] if rels else "?", rels[0][2] if rels else "?",
+        sum(a == b for a, b in zip(rows, rels)), len(rels))) if cur else "README に「いまの版」の行が見つからない"
+    return ok, detail
+
+
+# 引用欄の表は、版ごとの DOI と公開日を並べる。**行の全部を変更履歴の版の欄と突き合わせる。**
+# 一行だけ見ていると、古い版の DOI が書き換わっても通る。版を切るコミットでも同じ README のまま通ること。
+_ok_ja, _detail_ja = readme_release(_readme, _changelog, "（いまの版）")
 check("README の「いまの版」が、変更履歴の最新の版と DOI に合い、版の表の全行が変更履歴の版の欄と合う",
-      _current is not None and _released_doi is not None
-      and (_current.group(1), _current.group(2)) == (_released, _released_doi.group(1))
-      and len(_releases) > 0 and _rows_ja == [(v, d, doi) for v, d, doi in _releases],
-      ("README %s %s / 変更履歴 %s %s / 表の行 %d が合う、変更履歴の版 %d" % (
-          _current.group(1), _current.group(2), _released,
-          _released_doi.group(1) if _released_doi else "?",
-          sum(a == b for a, b in zip(_rows_ja, _releases)), len(_releases)))
-      if _current else "README に「いまの版」の行が見つからない")
+      _ok_ja and readme_release(_readme, _RC[3], "（いまの版）")[0], _detail_ja)
 
 # README は宣言に書ける名前を並べ、その数を名乗っている。道具の KNOWN_TABLES と
 # 一つでも食い違えば、利用者は README を信じて書いた宣言で落とされる。
@@ -572,17 +714,9 @@ check("README が並べる宣言の名前が、道具の KNOWN_TABLES と一致�
 
 # 英語の README は日本語の README の写しである。**写しの数が元とずれれば、英語で読む人だけが
 # 古い数を信じる。**版・宣言の名前・名乗る項目数を、日本語の側と同じ物差しで突き合わせる。
-_readme_en = io.open(os.path.join(ROOT, "README.en.md"), encoding="utf-8").read()
-_current_en = re.search(r"^\| v([0-9][^ ]*) \(current\) \| \[([^\]]+)\]", _readme_en, re.M)
+_ok_en, _detail_en = readme_release(_readme_en, _changelog, r" \(current\)")
 check("英語の README の「current」が、変更履歴の最新の版と DOI に合い、版の表の全行が変更履歴の版の欄と合う",
-      _current_en is not None and _released_doi is not None
-      and (_current_en.group(1), _current_en.group(2)) == (_released, _released_doi.group(1))
-      and _release_rows(_readme_en, r" \(current\)") == [(v, d, doi) for v, d, doi in _releases],
-      ("README.en %s %s / 変更履歴 %s / 表の行 %d が合う、変更履歴の版 %d" % (
-          _current_en.group(1), _current_en.group(2), _released,
-          sum(a == b for a, b in zip(_release_rows(_readme_en, r" \(current\)"), _releases)),
-          len(_releases)))
-      if _current_en else "英語の README に「current」の行が見つからない")
+      _ok_en and readme_release(_readme_en, _RC[3], r" \(current\)")[0], _detail_en)
 
 _fmt_en = re.search(r"### The declaration format is fixed.*?the following (\d+) names:\s*```\n(.*?)```",
                     _readme_en, re.S)
@@ -625,13 +759,190 @@ _paper_title = re.search(r"^title: '([^']+)'", _paper, re.M).group(1)
 # **済みと書いた欄は、paper.md を読めば確かめられる。**節の名前と語数の範囲は
 # SUBMIT.md の側から読み、ここに書き写さない。
 _submit = io.open(os.path.join(ROOT, "SUBMIT.md"), encoding="utf-8").read()
-_sections = re.search(r"^- \[x\] `paper\.md` に、JOSS が求める節がある：(.+)$", _submit, re.M)
-_bounds = re.search(r"^- \[x\] `paper\.md` の本文が (\d+)〜(\d+) 語に収まる", _submit, re.M)
-_rule = re.search(r"^語数は (\d+)〜(\d+) 語と決まっています。", _submit, re.M)
-_body = re.sub(r"<!--.*?-->", "", re.sub(r"^---\n.*?\n---\n", "", _paper, flags=re.S), flags=re.S)
-_words = len(_body.split())
-_wanted = re.findall(r"`([^`]+)`", _sections.group(1)) if _sections else []
-_missing = [h for h in _wanted if not re.search(r"^# " + re.escape(h) + r"$", _body, re.M)]
+
+
+def _git(*args):
+    """git を走らせて標準出力を返す。失敗すれば None。"""
+    try:
+        r = subprocess.run(["git"] + list(args), cwd=ROOT, capture_output=True, text=True)
+    except OSError:
+        return None
+    return r.stdout if r.returncode == 0 else None
+
+
+# 2026-11-23。JOSS の規程（openjournals/joss の docs/submitting.md）は、言語モデルの利用の開示に
+# "The tools/models used (and versions)" を求める。どのモデルを使ったかは、コミットの Co-Authored-By に
+# 一件ずつ残っている。**履歴に出てくるモデルを、開示の節がすべて名指ししていること。**
+# 新しいモデルでコミットすれば、ここが落ちる。開示を書き足すまで通らない。
+def trailer_models():
+    out = _git("log", "--format=%(trailers:key=Co-Authored-By,valueonly,separator=%x0A)")
+    if out is None:
+        return None
+    names = {re.sub(r"\s*<[^>]*>$", "", ln.strip()) for ln in out.splitlines() if ln.strip()}
+    return sorted(n for n in names if n.startswith("Claude"))
+
+
+_MODELS = trailer_models()
+# 規程の三点（道具と版と場所／助力の中身／人が確かめたという言明）に、論文の手引き（docs/paper.md）の
+# "how the quality and correctness of AI-generated content was verified" を足した四つの見出し。
+_AI_LABELS = ["**Tools, models and where they were used.**", "**Nature and scope of assistance.**",
+              "**How correctness was verified.**", "**Confirmation of review.**"]
+_NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
+
+
+def _flex(phrase):
+    """語のあいだの空白と改行を問わない型。論文は行を折り返している。"""
+    return r"\s+".join(re.escape(w) for w in phrase.split())
+
+
+def paper_problems(paper, submit, readme, bib):
+    """paper.md が、SUBMIT.md の点検表と規程と README と paper.bib に合っているか。食い違いの並びを返す。"""
+    p = []
+    sections = re.search(r"^- \[x\] `paper\.md` に、JOSS が求める節がある：(.+)$", submit, re.M)
+    bounds = re.search(r"^- \[x\] `paper\.md` の本文が (\d+)〜(\d+) 語に収まる", submit, re.M)
+    rule = re.search(r"^語数は (\d+)〜(\d+) 語と決まっています。", submit, re.M)
+    title = re.search(r"^title: '([^']+)'", paper, re.M)
+    body = re.sub(r"<!--.*?-->", "", re.sub(r"^---\n.*?\n---\n", "", paper, flags=re.S), flags=re.S)
+    words = len(body.split())
+    wanted = re.findall(r"`([^`]+)`", sections.group(1)) if sections else []
+    missing = [h for h in wanted if not re.search(r"^# " + re.escape(h) + r"$", body, re.M)]
+    if not wanted or missing:
+        p.append("欠けた節 " + (", ".join(missing) or "SUBMIT.md に節の並びが無い"))
+    if bounds is None or rule is None or rule.groups() != bounds.groups() \
+            or not int(bounds.group(1)) <= words <= int(bounds.group(2)):
+        p.append("語数 %d / 範囲 %s" % (words, ("%s〜%s" % bounds.groups()) if bounds else "SUBMIT.md に無い"))
+    # 2026-10-07 に論文の手引きに足された決まり。表題は引用の情報に写るので、逆引用符を使わない。
+    if title is None or "`" in title.group(1):
+        p.append("表題に逆引用符がある")
+    ai = re.search(r"^# AI usage disclosure\n(.*?)(?=^# )", body, re.M | re.S)
+    ai = " ".join(ai.group(1).split()) if ai else ""
+    if _MODELS is None or not _MODELS:
+        p.append("履歴から Co-Authored-By のモデルが読めない")
+    for m in (_MODELS or []) + ["Claude Code"]:
+        if not re.search(_flex(m) + r"(?!\.?\d)", ai):
+            p.append("開示の節が %s を名指ししていない" % m)
+    for lab in _AI_LABELS + ["The language model is not an author."]:
+        if lab not in ai:
+            p.append("開示の節に %s が無い" % lab)
+    # 散文に書いた数。設計の取捨の数は見出しの段落の数と、使っているリポジトリの数は README の並びと合う。
+    design = re.search(r"^# Software design\n(.*?)(?=^# )", body, re.M | re.S)
+    n_design = len(re.findall(r"^\*\*[^*]+\*\*", design.group(1), re.M)) if design else -1
+    used = re.search(r"^## 使われている場所\n(.*?)(?=^## )", readme, re.M | re.S)
+    n_used = len(re.findall(r"^- \[", used.group(1), re.M)) if used else -1
+    for said, real in [(re.search(r"^(\w+) trade-offs shaped the implementation\.", body, re.M), n_design),
+                       (re.search(r"across (\w+) repositories, run in continuous", body), n_used),
+                       (re.search(r"^(\w+) repositories vendor the module", " ".join(body.split()).replace(". ", ".\n"), re.M),
+                        n_used),
+                       (re.search(r"by the (\w+) repositories that use the tool", " ".join(body.split())), n_used)]:
+        if said is None or not 0 <= real < len(_NUMBER_WORDS) or said.group(1).lower() != _NUMBER_WORDS[real]:
+            p.append("数 %s / 実際 %d" % (said.group(1) if said else "名乗りが無い", real))
+    # 引いた鍵と paper.bib の鍵が一つずつ対応する。paper.bib の DOI は、README がすでに載せている番号だけ
+    # （決めごと 1。登録機関の記録と突き合わせたのは SUBMIT.md の「paper.bib で確かめたもの」）。
+    cited = set(re.findall(r"@([A-Za-z][\w-]*)", re.sub(r"`[^`]*`", "", body)))
+    keys = set(re.findall(r"^@\w+\{([^,\s]+),", bib, re.M))
+    if not keys or cited != keys:
+        p.append("引いた鍵 %s / paper.bib の鍵 %s" % (sorted(cited), sorted(keys)))
+    for d in re.findall(r"^\s*doi\s*=\s*\{([^}]+)\}", bib, re.M):
+        if d not in readme:
+            p.append("paper.bib の DOI %s が README に無い" % d)
+    return p
+
+
+# 2026-11-23。関門 1・3・4 の事実を SUBMIT.md に書いた。数えた先のコミットを固定し、そこまでを git から数え直す。
+# 先端で数えると、次のコミットで数が動いて落ちる（cpsbvbng26-dotcom の CLAUDE.md、開示の無いマージの件数）。
+# 浅い複製では数えられない。CI は fetch-depth: 0 で取り出す。
+_GATE_SHA = r"^数えた先は `main` の `([0-9a-f]{40})` です。"
+_GATE_SINCE = r"^- (\d{4}-\d{2}-\d{2}) 以降にマージした pull request："
+
+
+def gate_lines(sha, since):
+    """数えた先までの事実を、SUBMIT.md に書く形の行で返す。履歴が無ければ None。"""
+    if _git("cat-file", "-e", sha + "^{commit}") is None or _git("merge-base", "--is-ancestor", sha, "HEAD") is None:
+        return None
+    log = _git("log", sha, "--format=%as|%P|%an|%(trailers:key=Co-Authored-By,valueonly,separator=;)")
+    fp = _git("log", sha, "--first-parent", "--format=%cs|%s")
+    if not log or fp is None:
+        return None
+    rows = [ln.split("|", 3) for ln in log.splitlines() if ln]
+    dates = sorted(r[0] for r in rows)
+    merges = [r for r in rows if len(r[1].split()) > 1]
+    plain = [r for r in rows if len(r[1].split()) <= 1]
+    months, days = {}, {}
+    for d in dates:
+        months[d[:7]] = months.get(d[:7], 0) + 1
+    for d in sorted(set(dates)):
+        days[d[:7]] = days.get(d[:7], 0) + 1
+    prs = set()
+    for ln in fp.splitlines():
+        d, _, s = ln.partition("|")
+        m = re.match(r"Merge pull request #(\d+)", s) or re.search(r"\(#(\d+)\)$", s)
+        if m and d >= since:
+            prs.add(int(m.group(1)))
+    claude = [r for r in plain if any(t.strip().startswith("Claude") for t in r[3].split(";"))]
+    rest = [r for r in plain if r not in claude]
+    authors = {}
+    for r in plain:
+        authors[r[2]] = authors.get(r[2], 0) + 1
+    return [
+        "- 最初のコミットの日：%s" % dates[0],
+        "- 最後のコミットの日：%s" % dates[-1],
+        "- コミット：%d 件（マージを除くと %d 件、マージは %d 件）" % (len(rows), len(plain), len(merges)),
+        "- 月ごとのコミット：" + "、".join("%s が %d 件" % kv for kv in sorted(months.items())),
+        "- コミットのある日：%d 日（" % len(set(dates)) + "、".join("%s が %d 日" % kv for kv in sorted(days.items())) + "）",
+        "- %s 以降にマージした pull request：%d 件" % (since, len(prs)),
+        "- マージを除くコミットのうち、`Co-Authored-By` に Claude があるもの：%d 件。無い %d 件は%s" % (
+            len(claude), len(rest),
+            " dependabot のコミット" if all(r[2] == "dependabot[bot]" for r in rest) else "、dependabot 以外を含む"),
+        "- マージを除くコミットの作者の名：" + "、".join(
+            "%s が %d 件" % kv for kv in sorted(authors.items(), key=lambda kv: (-kv[1], kv[0]))),
+    ]
+
+
+def gate_problems(submit):
+    sha = re.search(_GATE_SHA, submit, re.M)
+    since = re.search(_GATE_SINCE, submit, re.M)
+    if sha is None or since is None:
+        return ["SUBMIT.md に数えた先か、pull request を数える日が無い"]
+    lines = gate_lines(sha.group(1), since.group(1))
+    if lines is None:
+        return ["数えた先 %s が履歴に無い（浅い複製なら fetch-depth: 0 が要る）" % sha.group(1)[:7]]
+    have = set(submit.splitlines())
+    return ["git では「%s」" % ln for ln in lines if ln not in have]
+
+
+_bib = io.open(os.path.join(ROOT, "paper.bib"), encoding="utf-8").read()
+_PP = paper_problems(_paper, _submit, _readme, _bib)
+_GP = gate_problems(_submit)
+
+# 壊した写し。paper.md の側と SUBMIT.md の側の両方で、決めたことに当たらない形を作る。
+_paper_breaks = [(b, _bib) for b in [
+    _paper.replace("title: '", "title: '`", 1).replace(": deterministic", "`: deterministic", 1),
+    _paper.replace("# Acknowledgements\n", ""),
+    _paper.replace("# References", " ".join(["word"] * 400) + "\n\n# References"),
+    re.sub(_flex("Claude Code"), "an agent", _paper),
+    re.sub(_flex("The language model is not an author."), "", _paper),
+    re.sub(r"^Four trade-offs", "Five trade-offs", _paper, flags=re.M),
+    re.sub(_flex("across three repositories, run in continuous"), "across four repositories, run in continuous", _paper),
+    re.sub(_flex("by the three repositories that use the tool"), "by the two repositories that use the tool", _paper),
+    re.sub(_flex("Three repositories vendor the module"), "Two repositories vendor the module", _paper),
+    _paper.replace("[@luger2022]", "[@luger2021]"),
+] + [re.sub(_flex(lab), "", _paper) for lab in _AI_LABELS] + [
+    # 履歴に出てくるモデルを、一つずつ開示から外す。後ろに版の続く名（5 と 5.5）を取り違えないことも見る。
+    re.sub(_flex(m) + r"(?!\.?\d)", "a model", _paper) for m in (_MODELS or [])]] + [
+    (_paper, _bib + "\n@misc{unused2026,\n  title = {Not cited},\n  year = {2026}\n}\n"),
+    (_paper, _bib.replace("doi     = {10.3758/s13428-015-0664-2}", "doi     = {10.3758/s13428-015-0664-3}")),
+]
+_sec = re.search(r"^## 関門の数（git から数えた）\n.*?(?=^## )", _submit, re.M | re.S)
+_gate_breaks = [_submit.replace(re.search(_GATE_SHA, _submit, re.M).group(1), "0" * 40)] if _sec else []
+if _sec:
+    # 箇条の数を一つずつずらす。pull request を数える日は外す（ずらしても正しいことがある）。
+    for _ln in [x for x in _sec.group(0).splitlines() if x.startswith("- ") and not re.match(_GATE_SINCE, x)]:
+        for _m in re.finditer(r"\d+", _ln):
+            _bumped = _ln[:_m.start()] + str(int(_m.group(0)) + 1).zfill(len(_m.group(0))) + _ln[_m.end():]
+            _gate_breaks.append(_submit.replace(_ln + "\n", _bumped + "\n", 1))
+_paper_break_ok = sum(1 for b, bb in _paper_breaks
+                      if (b, bb) != (_paper, _bib) and paper_problems(b, _submit, _readme, bb))
+_gate_break_ok = sum(1 for b in _gate_breaks if b != _submit and gate_problems(b))
 # 2026-11-12（三度目の見落とし）。所属は著者の在籍先として ZEN University, Japan の一つだけを書く。
 # JOSS の論文の手引きは、著者とその所属の一覧を求める。所属を書くと、道具が大学の仕事か、
 # 大学が認めたものと読まれうる。本文に、大学の仕事ではなく、大学が認めてもいないと一文で書く。
@@ -654,18 +965,19 @@ _affil_breaks = [
     _paper.replace("  - name: ZEN University, Japan\n", "  - name: ZEN University, Japan\n    index: 1\n  - name: Independent\n"),
     _paper.replace(_AFFIL, ""),
 ]
+_words = len(re.sub(r"^---\n.*?\n---\n", "", _paper, flags=re.S).split())
 check(".zenodo.json の表題が paper.md と揃い、SUBMIT.md の点検表が済みとした節と語数を paper.md が満たし、"
-      "所属は ZEN University, Japan の一つだけで、本文が大学の仕事ではなく大学が認めてもいないと書く（壊した写しでは落ちる）",
-      _zenodo["title"].startswith(_paper_title)
-      and len(_wanted) > 0 and not _missing
-      and _bounds is not None and int(_bounds.group(1)) <= _words <= int(_bounds.group(2))
-      and _rule is not None and _rule.groups() == _bounds.groups()
-      and _affil_ok(_paper) and all(b != _paper and not _affil_ok(b) for b in _affil_breaks),
-      "語数 %d / 範囲 %s / 欠けた節 %s / 所属の一文 %s / 壊した写しで落ちる %s" % (
-          _words, ("%s〜%s" % _bounds.groups()) if _bounds else "SUBMIT.md に無い",
-          ", ".join(_missing) or ("無し" if _wanted else "SUBMIT.md に節の並びが無い"),
+      "所属は ZEN University, Japan の一つだけで、本文が大学の仕事ではなく大学が認めてもいないと書き、"
+      "表題に逆引用符が無く、AI usage disclosure が履歴に出てくるモデルをすべて名指しし、本文の数が README と合い、"
+      "SUBMIT.md の関門の数が git と合う（壊した写しでは落ちる）",
+      _zenodo["title"].startswith(_paper_title) and not _PP and not _GP
+      and _affil_ok(_paper) and all(b != _paper and not _affil_ok(b) for b in _affil_breaks)
+      and _paper_break_ok == len(_paper_breaks) and len(_gate_breaks) > 1 and _gate_break_ok == len(_gate_breaks),
+      "語数 %d / 食い違い %s / モデル %s / 所属の一文 %s / 壊した写しで落ちる 所属 %d・論文 %d / %d・関門 %d / %d" % (
+          _words, " / ".join(_PP + _GP) or "無し", ", ".join(_MODELS or []) or "読めない",
           "有り" if _affil_ok(_paper) else "無し",
-          sum(1 for b in _affil_breaks if b != _paper and not _affil_ok(b))))
+          sum(1 for b in _affil_breaks if b != _paper and not _affil_ok(b)),
+          _paper_break_ok, len(_paper_breaks), _gate_break_ok, len(_gate_breaks)))
 
 print("\n" + "-" * 58)
 if failures:
