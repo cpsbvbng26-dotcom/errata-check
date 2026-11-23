@@ -586,49 +586,70 @@ def version_problems(tool_src, pyproject, citation, changelog):
     return p
 
 
-def release_commit(tool_src, pyproject, citation, changelog, new, date):
-    """版を切るコミットを、いまの中身から作る。決めた形をそのとおりに当てたもの。"""
+def bump(tool_src, pyproject, citation, new):
+    """版を書く三か所（変更履歴の外）の版の番号だけを new にする。"""
     old = re.search(r'^__version__ = "([^"]+)"$', tool_src, re.M).group(1)
     return (tool_src.replace('__version__ = "%s"' % old, '__version__ = "%s"' % new),
-            re.sub(r'^Archive = .*\n', "", pyproject.replace('version = "%s"' % old, 'version = "%s"' % new),
+            pyproject.replace('version = "%s"' % old, 'version = "%s"' % new),
+            re.sub(r'^version: .*$', "version: %s" % new, citation, flags=re.M))
+
+
+def release_commit(tool_src, pyproject, citation, changelog, new, date):
+    """版を切るコミットを、いまの中身から作る。決めた形をそのとおりに当てたもの。
+    「## 未リリース」が無ければ、いちばん上の版の欄の前に新しい欄を置く。"""
+    t, p, c = bump(tool_src, pyproject, citation, new)
+    head = "## [%s] — %s\n\n%s\n" % (new, date, RELEASE_MARKER)
+    log = (changelog.replace("## 未リリース\n", head, 1) if "\n## 未リリース\n" in changelog
+           else re.sub(r"^## \[", lambda m: head + "\n## [", changelog, count=1, flags=re.M))
+    return (t, re.sub(r'^Archive = .*\n', "", p, flags=re.M),
+            re.sub(r'^doi: .*\n', "", re.sub(r'^date-released: .*$', 'date-released: "%s"' % date, c, flags=re.M),
                    flags=re.M),
-            re.sub(r'^doi: .*\n', "", re.sub(r'^date-released: .*$', 'date-released: "%s"' % date,
-                                             citation.replace("version: %s" % old, "version: %s" % new),
-                                             flags=re.M), flags=re.M),
-            changelog.replace("## 未リリース\n", "## [%s] — %s\n\n%s\n" % (new, date, RELEASE_MARKER), 1))
+            log)
+
+
+def with_doi(pyproject, citation, doi):
+    """CITATION.cff の doi と pyproject.toml の Archive を、doi を指す一行にする（無ければ置く）。"""
+    c = re.sub(r'^doi: .*\n', "", citation, flags=re.M)
+    c = re.sub(r'^(version: )', "doi: %s\n\\1" % doi, c, count=1, flags=re.M)
+    p = re.sub(r'^Archive = .*\n', "", pyproject, flags=re.M)
+    p = re.sub(r'^(Repository = .*\n)', '\\1Archive = "https://doi.org/%s"\n' % doi, p, count=1, flags=re.M)
+    return p, c
 
 
 _VP = version_problems(TOOL_SRC, _pyproject, _citation, _changelog)
-_RC = release_commit(TOOL_SRC, _pyproject, _citation, _changelog, "9.9.9", "2099-12-31")
+_REAL = (TOOL_SRC, _pyproject, _citation, _changelog)
+# いちばん上の版の欄が決めた一文を持つなら、いまが版を切るコミットである。そうでなければ、いまの中身から作る。
+_TOP_LINE = re.search(r"^## \[[^\]]*\] — [^\n]*\n\n([^\n]*)$", _changelog, re.M)
+_RC = (_REAL if _TOP_LINE and _TOP_LINE.group(1) == RELEASE_MARKER
+       else release_commit(TOOL_SRC, _pyproject, _citation, _changelog, "9.9.9", "2099-12-31"))
 _PREV_DOI = _releases_of(_changelog)[1][2]
 _DATE = re.search(r'^date-released: "?(\d{4}-\d{2}-\d{2})"?$', _citation, re.M).group(1)
 # 壊した写し。どれも、決めた二つの形のどちらにも当たらない。版と日付と DOI は、いまの中身から取る。
+# 版と版のあいだでも、版を切るコミットの中でも、同じ写しが作れるように書く。
 _version_breaks = [
     ("CITATION.cff の date-released を変更履歴と違えて書く",
      (TOOL_SRC, _pyproject, _citation.replace(_DATE, "2099-01-01"), _changelog)),
     ("CITATION.cff の doi を前の版の DOI にする",
-     (TOOL_SRC, _pyproject, re.sub(r"^doi: .*$", "doi: " + _PREV_DOI, _citation, flags=re.M), _changelog)),
+     (TOOL_SRC, _pyproject, with_doi(_pyproject, _citation, _PREV_DOI)[1], _changelog)),
     ("pyproject.toml の Archive を前の版の DOI にする",
-     (TOOL_SRC, re.sub(r'^Archive = .*$', 'Archive = "https://doi.org/%s"' % _PREV_DOI, _pyproject, flags=re.M),
-      _citation, _changelog)),
+     (TOOL_SRC, with_doi(_pyproject, _citation, _PREV_DOI)[0], _citation, _changelog)),
     ("identifiers の版の名乗りを別の版にする",
      (TOOL_SRC, _pyproject, re.sub(r"description: v\S+ の版 DOI", "description: v9.9.8 の版 DOI", _citation),
       _changelog)),
-    ("変更履歴に欄を作らずに、四か所の版だけを上げる",
-     (_RC[0], _RC[1], _RC[2], _changelog)),
+    ("変更履歴に欄を作らずに、ほかの三か所の版だけを上げる",
+     bump(TOOL_SRC, _pyproject, _citation, "9.9.7") + (_changelog,)),
     ("版を切るコミットで、CITATION.cff に前の版の doi を残す",
-     (_RC[0], _RC[1], _citation.replace("version: " + VERSION, "version: 9.9.9").replace(_DATE, "2099-12-31"),
-      _RC[3])),
+     (_RC[0], _RC[1], with_doi(_RC[1], _RC[2], _PREV_DOI)[1], _RC[3])),
     ("版を切るコミットで、pyproject.toml に前の版の Archive を残す",
-     (_RC[0], _pyproject.replace('version = "%s"' % VERSION, 'version = "9.9.9"'), _RC[2], _RC[3])),
+     (_RC[0], with_doi(_RC[1], _RC[2], _PREV_DOI)[0], _RC[2], _RC[3])),
     ("版を切るコミットの DOI の行を、決めた文と違えて書く",
      (_RC[0], _RC[1], _RC[2], _RC[3].replace(RELEASE_MARKER, "DOI: 未付与"))),
-    ("二つ目の版の欄から DOI の行を消す",
-     (TOOL_SRC, _pyproject, _citation, _changelog.replace("DOI: `%s`\n" % _PREV_DOI, "", 1))),
+    ("二つ目の DOI のある版の欄から DOI の行を消す",
+     (TOOL_SRC, _pyproject, _citation, _changelog.replace("\nDOI: `%s`\n" % _PREV_DOI, "\n", 1))),
 ]
-# 写しが本当に元と違うこと（置き換えが空振りすれば、壊したことにならない）。
-assert all(args != (TOOL_SRC, _pyproject, _citation, _changelog) and args != _RC for _, args in _version_breaks)
-_version_break_ok = sum(1 for _, args in _version_breaks if any(version_problems(*args).values()))
+# 写しが元とも版を切るコミットとも違うこと（置き換えが空振りすれば、壊したことにならない）。
+_version_break_ok = sum(1 for _, args in _version_breaks
+                        if args != _REAL and args != _RC and any(version_problems(*args).values()))
 _rc_problems = version_problems(*_RC)
 
 for rel, extra, extra_label in [
