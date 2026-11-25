@@ -74,7 +74,19 @@ routinely separate documents.
 
 # State of the field
 
-`statcheck` and GRIM are the closest relatives, and the tool implements both ideas
+Corrections already have a registry. Publishers deposit update notices, such as
+corrections, errata and retractions, with Crossref, and the Crossref REST API
+returns them in the updated work's `update-to` field [@crossrefapi]. Since
+Crossref acquired the Retraction Watch Database in 2023, its records are released
+openly and appear in the same field [@rwdata]. These sources record whether a work
+was corrected, when, and by which notice. They do not read either document:
+nothing in them checks that a notice quotes the original exactly, counts every
+affected passage, or keeps an unrepairable item unrepaired. `errata-check` is
+complementary to them. It audits the content of a correction record, including
+one kept by its author beside an archived file rather than deposited. As
+registries and datasets, they offer no checking code to extend.
+
+Among checking tools, `statcheck` and GRIM are the closest relatives, and the tool implements both ideas
 independently, but they answer a different question: whether the numbers inside a
 manuscript are internally consistent. They do not compare two documents, and they
 have nothing to say about counts, unrepairable entries, or file substitution.
@@ -177,6 +189,12 @@ change; the statistical routines are checked against published critical-value
 tables; and released versions are vendored and run in continuous integration by
 the three repositories that use the tool. Every number reported in this paper was
 produced by executing the code.
+
+<!-- The paragraph below is the author's own affirmation, which the JOSS policy
+requires ("Human verification confirmation"). Claude Code drafted its wording and
+cannot sign it on the author's behalf. Every commit that has changed this file
+carries a Claude Co-Authored-By trailer, so the history holds no record of the
+author's signature. -->
 
 **Confirmation of review.** The author reviewed, edited and validated all
 LLM-assisted output, and made the core design decisions: the framing that the
