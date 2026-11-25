@@ -38,3 +38,18 @@ to = [["CLAUDE.md", 'examples/minimal/audit\.toml\s+# (\d+) 項目']]
 what = "見本（分野ごと）の項目数"
 from = ["README.md", 'examples/disciplines/audit\.toml\s+# (\d+) 項目']
 to = [["CLAUDE.md", 'examples/disciplines/audit\.toml\s+# (\d+) 項目']]
+
+# 法令の点検の記録の八度目の表の判定の数（2026-11-25）。ワークフローを足すと行が増え、散文の数も動く。
+[[counts]]
+what = "法令の点検の記録の八度目の表で、漏れと判定した行"
+files = "docs/legal-audit-2026-11-12.md"
+section = "## 2026-11-12 の続き：八度目の見落とし"
+pattern = '^\| [^\n]*\| 漏れ \| [^\n]*\|$'
+places = [["docs/legal-audit-2026-11-12.md", '^この表の判定は、漏れ (\d+)、問題なし \d+ です。\n2026-11-14 に']]
+
+[[counts]]
+what = "法令の点検の記録の八度目の表で、問題なしと判定した行"
+files = "docs/legal-audit-2026-11-12.md"
+section = "## 2026-11-12 の続き：八度目の見落とし"
+pattern = '^\| [^\n]*\| 問題なし \| [^\n]*\|$'
+places = [["docs/legal-audit-2026-11-12.md", '^この表の判定は、漏れ \d+、問題なし (\d+) です。\n2026-11-14 に']]
