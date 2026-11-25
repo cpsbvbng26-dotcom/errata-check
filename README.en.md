@@ -50,6 +50,25 @@ python3 errata_check.py examples/minimal/audit.toml
 
 If everything passes, the last line ends with 「すべて通りました。」 ("all passed"). The steps for breaking the example in one place and watching it fail are in [`examples/README.md`](examples/README.md).
 
+### Installing
+
+errata-check is not on PyPI yet. It is installed with `pip` from a clone:
+
+```
+git clone https://github.com/cpsbvbng26-dotcom/errata-check.git
+cd errata-check
+pip install ".[pdf]"    # or pip install . if no PDF is read
+errata-check --version
+```
+
+This provides the `errata-check` command, which is the same as `python3 errata_check.py`.
+The dependencies are declared in [`pyproject.toml`](pyproject.toml). None is required.
+`pypdf` (3 or later) is needed only when a primary source is a PDF.
+The tool can also be used without installing: `errata_check.py` is a single file and runs where it is copied.
+
+`pyproject.toml` asks for Python 3.9 or later. Declarations written in TOML need Python 3.11 or later (`tomllib` in the standard library).
+CI runs the checks on Python 3.11, 3.12 and 3.13.
+
 ### A note on language
 
 The comments and docstrings in the code, the labels of the checks, and the messages the tool prints are in Japanese, as are `CHANGELOG.md`, `CONTRIBUTING.md` and `SUBMIT.md`. What a program reads is not: the names of the declaration's tables and keys, the `PASS` and `FAIL` markers, the exit status, and the keys of the `--json` output (`version`, `passed`, `failed`, `results`, and `group`, `label`, `ok`, `detail` for each result) are the same in any language. The issue form for bug reports is in both languages.
@@ -274,7 +293,7 @@ Setting `pdf` to `'false'` skips installing `pypdf`; that is enough for a declar
 
 If any audit item fails, the step fails. The result table goes to the log as it is.
 
-`@main` is a moving target. There is no tag yet. Until there is, pinning to a commit SHA keeps the contents from moving.
+`@main` is a moving target. No tag contains `action.yml` yet: the tags up to `v0.3.0` were made before it was added. Until one does, pinning to a commit SHA keeps the contents from moving.
 
 This repository's own CI uses the Action on itself. It checks both that the example passes and that
 a copy with a shifted count declaration fails.
@@ -387,7 +406,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) (in Japanese). When adding a check, add t
 
 ## Where it is going
 
-It is to be submitted to JOSS (Journal of Open Source Software). It has not been submitted yet. On 10 September 2026 the author decided not to submit it for now; it will not be submitted before 7 March 2027. On 11 November 2026 the author decided to submit it together with the code of Sophaxis, in May 2027 or later. The paper is [`paper.md`](paper.md); the procedure and the reasons it may not pass are in [`SUBMIT.md`](SUBMIT.md) (in Japanese).
+It is to be submitted to JOSS (Journal of Open Source Software). It has not been submitted yet. On 10 September 2026 the author decided not to submit it for now; it will not be submitted on or before 7 March 2027. On 11 November 2026 the author decided to submit it together with the code of Sophaxis, in May 2027 or later. The paper is [`paper.md`](paper.md); the procedure and the reasons it may not pass are in [`SUBMIT.md`](SUBMIT.md) (in Japanese).
 
 ---
 

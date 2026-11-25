@@ -783,6 +783,17 @@ def trailer_models():
 
 
 _MODELS = trailer_models()
+
+
+def paper_trailers():
+    """paper.md を変えたコミットごとの Co-Authored-By（; で区切る）。履歴が読めなければ None。"""
+    out = _git("log", "--format=%x1e%(trailers:key=Co-Authored-By,valueonly,separator=;)", "--", "paper.md")
+    if out is None:
+        return None
+    return [x.strip() for x in out.split("\x1e")[1:]]
+
+
+_PAPER_TRAILERS = paper_trailers()
 # 規程の三点（道具と版と場所／助力の中身／人が確かめたという言明）に、論文の手引き（docs/paper.md）の
 # "how the quality and correctness of AI-generated content was verified" を足した四つの見出し。
 _AI_LABELS = ["**Tools, models and where they were used.**", "**Nature and scope of assistance.**",
@@ -808,6 +819,10 @@ def paper_problems(paper, submit, readme, bib):
     missing = [h for h in wanted if not re.search(r"^# " + re.escape(h) + r"$", body, re.M)]
     if not wanted or missing:
         p.append("欠けた節 " + (", ".join(missing) or "SUBMIT.md に節の並びが無い"))
+    # 2026-11-25。論文の手引き（docs/paper.md）は節を Summary から References までの順に挙げる。並びも見る。
+    at = [m.start() for h in wanted for m in [re.search(r"^# " + re.escape(h) + r"$", body, re.M)] if m]
+    if not missing and at != sorted(at):
+        p.append("節の並びが SUBMIT.md の点検表の順でない")
     if bounds is None or rule is None or rule.groups() != bounds.groups() \
             or not int(bounds.group(1)) <= words <= int(bounds.group(2)):
         p.append("語数 %d / 範囲 %s" % (words, ("%s〜%s" % bounds.groups()) if bounds else "SUBMIT.md に無い"))
@@ -845,6 +860,20 @@ def paper_problems(paper, submit, readme, bib):
     for d in re.findall(r"^\s*doi\s*=\s*\{([^}]+)\}", bib, re.M):
         if d not in readme:
             p.append("paper.bib の DOI %s が README に無い" % d)
+        # 2026-11-25。DOI の欄は、接頭の 10.、登録者の番号、斜線、接尾だけを持つ。URL や doi: の前置きは入れない。
+        if not re.fullmatch(r"10\.\d{4,9}/[-._;()/:A-Za-z0-9]+", d):
+            p.append("paper.bib の DOI %s の形が崩れている" % d)
+    # 2026-11-25。Confirmation of review の段は、JOSS が求める著者自身の言明である。Claude は代わって署名できない。
+    # その段の直前に、そう書いた注釈を置く（PDF には出ない）。注釈は「このファイルを変えたコミットはどれも Claude を
+    # 共著者に持つ」と書くので、注釈がある限り、履歴がそのとおりであることも見る。
+    note = re.search(r"<!-- The paragraph below is the author's own affirmation,(.*?)-->\s*\n\*\*Confirmation of review\.\*\*",
+                     paper, re.S)
+    if note is None or "cannot sign it on the author's behalf" not in " ".join(note.group(1).split()):
+        p.append("Confirmation of review の段の前に、著者自身の言明であるという注釈が無い")
+    elif _PAPER_TRAILERS is None or not _PAPER_TRAILERS \
+            or not all(any(t.strip().startswith("Claude") for t in tr.split(";")) for tr in _PAPER_TRAILERS):
+        p.append("注釈は paper.md を変えたコミットがどれも Claude を共著者に持つと書くが、履歴は %s" % (
+            "読めない" if _PAPER_TRAILERS is None else "そうでない"))
     return p
 
 
@@ -931,6 +960,13 @@ _paper_breaks = [(b, _bib) for b in [
     re.sub(_flex(m) + r"(?!\.?\d)", "a model", _paper) for m in (_MODELS or [])]] + [
     (_paper, _bib + "\n@misc{unused2026,\n  title = {Not cited},\n  year = {2026}\n}\n"),
     (_paper, _bib.replace("doi     = {10.3758/s13428-015-0664-2}", "doi     = {10.3758/s13428-015-0664-3}")),
+    # 2026-11-25。README にある URL の形のまま DOI の欄に入れる。README の突き合わせは通り、形の検査だけが落とす。
+    (_paper, _bib.replace("doi     = {10.3758/s13428-015-0664-2}", "doi     = {https://doi.org/10.3758/s13428-015-0664-2}")),
+    # 節の並びを入れ替える（Software design を State of the field の前に出す）。
+    (re.sub(r"(^# State of the field\n.*?)(^# Software design\n.*?)(?=^# Research impact statement$)",
+            lambda m: m.group(2) + m.group(1), _paper, flags=re.M | re.S), _bib),
+    # 著者自身の言明であるという注釈を外す。
+    (re.sub(r"<!-- The paragraph below is the author's own affirmation,.*?-->\s*\n", "", _paper, flags=re.S), _bib),
 ]
 _sec = re.search(r"^## 関門の数（git から数えた）\n.*?(?=^## )", _submit, re.M | re.S)
 _gate_breaks = [_submit.replace(re.search(_GATE_SHA, _submit, re.M).group(1), "0" * 40)] if _sec else []
@@ -942,6 +978,11 @@ if _sec:
             _gate_breaks.append(_submit.replace(_ln + "\n", _bumped + "\n", 1))
 _paper_break_ok = sum(1 for b, bb in _paper_breaks
                       if (b, bb) != (_paper, _bib) and paper_problems(b, _submit, _readme, bb))
+# 履歴の側を壊す。paper.md を変えたコミットに、Claude を共著者に持たないものが一つ混じった形を渡す。
+_kept_trailers = _PAPER_TRAILERS
+_PAPER_TRAILERS = (_kept_trailers or []) + ["Someone Else"]
+_hist_break_ok = bool(_kept_trailers) and bool(paper_problems(_paper, _submit, _readme, _bib))
+_PAPER_TRAILERS = _kept_trailers
 _gate_break_ok = sum(1 for b in _gate_breaks if b != _submit and gate_problems(b))
 # 2026-11-12（三度目の見落とし）。所属は著者の在籍先として ZEN University, Japan の一つだけを書く。
 # JOSS の論文の手引きは、著者とその所属の一覧を求める。所属を書くと、道具が大学の仕事か、
@@ -965,19 +1006,21 @@ _affil_breaks = [
     _paper.replace("  - name: ZEN University, Japan\n", "  - name: ZEN University, Japan\n    index: 1\n  - name: Independent\n"),
     _paper.replace(_AFFIL, ""),
 ]
-_words = len(re.sub(r"^---\n.*?\n---\n", "", _paper, flags=re.S).split())
+_words = len(re.sub(r"<!--.*?-->", "", re.sub(r"^---\n.*?\n---\n", "", _paper, flags=re.S), flags=re.S).split())
 check(".zenodo.json の表題が paper.md と揃い、SUBMIT.md の点検表が済みとした節と語数を paper.md が満たし、"
       "所属は ZEN University, Japan の一つだけで、本文が大学の仕事ではなく大学が認めてもいないと書き、"
       "表題に逆引用符が無く、AI usage disclosure が履歴に出てくるモデルをすべて名指しし、本文の数が README と合い、"
       "SUBMIT.md の関門の数が git と合う（壊した写しでは落ちる）",
       _zenodo["title"].startswith(_paper_title) and not _PP and not _GP
       and _affil_ok(_paper) and all(b != _paper and not _affil_ok(b) for b in _affil_breaks)
-      and _paper_break_ok == len(_paper_breaks) and len(_gate_breaks) > 1 and _gate_break_ok == len(_gate_breaks),
-      "語数 %d / 食い違い %s / モデル %s / 所属の一文 %s / 壊した写しで落ちる 所属 %d・論文 %d / %d・関門 %d / %d" % (
+      and _paper_break_ok == len(_paper_breaks) and _hist_break_ok
+      and len(_gate_breaks) > 1 and _gate_break_ok == len(_gate_breaks),
+      "語数 %d / 食い違い %s / モデル %s / 所属の一文 %s / 壊した写しで落ちる 所属 %d・論文 %d / %d・履歴 %s・関門 %d / %d" % (
           _words, " / ".join(_PP + _GP) or "無し", ", ".join(_MODELS or []) or "読めない",
           "有り" if _affil_ok(_paper) else "無し",
           sum(1 for b in _affil_breaks if b != _paper and not _affil_ok(b)),
-          _paper_break_ok, len(_paper_breaks), _gate_break_ok, len(_gate_breaks)))
+          _paper_break_ok, len(_paper_breaks), "落ちる" if _hist_break_ok else "落ちない",
+          _gate_break_ok, len(_gate_breaks)))
 
 print("\n" + "-" * 58)
 if failures:

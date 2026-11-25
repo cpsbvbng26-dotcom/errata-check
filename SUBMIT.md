@@ -8,10 +8,13 @@
 出すこと自体をやめたのではありません。
 
 2026年11月11日に、出す時期を決めました。Sophaxis のコードと一緒に、2027年5月以降に出します。
-2027年3月7日（関門 1 が満ちる日）は、その前に来ます。下の「いつ出すか」は、その日付を必要条件として残しています。
+関門 1 が満ちるのは 2027年3月7日より後で、その前に来ます。下の「いつ出すか」は、その日付を必要条件として残しています。
 
 2026年11月23日に、規程を読み直しました（下の「2026年11月23日に読み直したもの」）。出す時期の決めは変えていません。
 読み直して分かった障害は、その節の「規程に照らした障害」に書きました。
+
+2026年11月25日に、2026年11月24日の規程でもう一度読み直しました（下の「2026年11月25日に読み直したもの」）。
+点検表の一行ずつに、規程の文と、いまの状態と、直したものを当てています。出す時期の決めは変えていません。
 
 ## 出すもの
 
@@ -39,19 +42,22 @@
 
 この文書が引いている JOSS の規程（「受け付け前の四つの関門」と「原文を読んで直したもの」）を、
 一行ずつの点検に直したもの。`[x]` は済み、`[ ]` はまだ。出すのは早くても 2027年3月7日より後。
+関門の行の頭の札は、2026年11月25日に足しました。「いま満たす」「日付で満ちる」「満たさない」のどれかです。
 
 関門（`docs/submitting.md` の「Pre-review screening criteria」）
 
-- [ ] 関門 1：公開の開発履歴が六か月を超えている。2027年3月7日までは満たさない。コミットが数日に集中していないこと。数は下の「関門の数（git から数えた）」
-- [x] 関門 2：研究に使われている証拠。三つのリポジトリで、凍結された成果物の正誤表を CI で監査している
-- [ ] 関門 3：開かれた開発の実践。リリース・試験・CI・文書・`CONTRIBUTING.md`・支えの範囲・変更履歴・不具合報告の様式はある。続いたコミットがまだ足りない
-- [ ] 関門 4：時間をかけた反復。2026年9月18日より後は、変更をすべて pull request で残している。反復の記録として読める長さにはまだ足りない
+- [ ] 関門 1（日付で満ちる）：公開の開発履歴が六か月を超えている。2027年3月7日までは満たさない。コミットが数日に集中していないこと。数は下の「関門の数（git から数えた）」、日付の出し方は下の「関門 1 の日付」
+- [x] 関門 2 の最低限（いま満たす）：研究に使われている証拠のうち、規程が最低限とする開発者自身の利用。三つのリポジトリで、凍結された成果物の正誤表を CI で監査している
+- [ ] 関門 2 の望ましい形（満たさない）：著者のほかの利用（"ideally by others"）。著者のほかに使った記録は無い。開発者自身の利用で足りるかは、編集者が決める
+- [x] 関門 3（いま満たす）：開かれた開発の実践。単独の著者に求める複数の目印（タグ付きのリリース・変更履歴・試験と CI・文書・`CONTRIBUTING.md`・支えの範囲）がそろう。公開のコミットの履歴は短い
+- [ ] 関門 4（満たさない）：時間をかけた反復。2026年9月18日より後は、変更をすべて pull request で残している。コミットは 2026年9月と 2026年11月に集まり、使いながら直した跡として読める長さにはまだ足りない
 
 規程が「受け付けられない」と書く形（2026年11月23日に読み直して足した。原文は下の「規程に照らした障害」）
 
 - [ ] 単独の著者で、著者のほかの関与の証拠が無い。`review_criteria.md` の「Collaborative effort」は、これを「Not acceptable」とする
 - [ ] 出す著者が、コミットの履歴から見て大きく寄与している。いまの履歴では、マージを除くコミットのほとんどに Claude が共著者として載る
 - [ ] 新しいソフトウェアなら、同僚が試している。試したという記録は無い
+- [ ] 小さな道具や一つの機能だけの梱包ではない（"Minor utility"）。本体は一つのファイルで、そう読まれうる。読むのは編集者である（下の「規程に照らした障害」）
 
 論文（`paper.md` と `paper.bib`）
 
@@ -60,7 +66,13 @@
 - [x] `paper.md` の表題に逆引用符を使っていない（2026年10月7日に論文の手引きに足された決まり）
 - [x] 外部の採用が無いことを、`Research impact statement` に書いてある
 - [x] 言語モデルの利用を、`AI usage disclosure` に規程が求める三点と確かめ方で書いてある。使ったモデルを版まで名指ししている。言語モデルを著者にしていない
-- [x] `paper.bib` の DOI を、登録機関の記録と突き合わせた（2026年11月23日、Crossref。下の「2026年11月23日に読み直したもの」）
+- [x] `paper.md` の節が、上の並びの順にある（2026年11月25日に検査に足した）
+- [x] `paper.bib` の DOI を、登録機関の記録と突き合わせた（2026年11月23日と 2026年11月25日、Crossref。下の「2026年11月23日に読み直したもの」と「2026年11月25日に読み直したもの」）
+- [x] 引いた鍵と `paper.bib` の項目が一つずつ対応し、DOI の欄が DOI の形をしている（検査が見る）
+- [x] `State of the field` が、訂正と撤回の登録（Crossref の更新の記録と Retraction Watch のデータ）と比べている（2026年11月25日）
+- [x] JOSS の組版（inara）で PDF の下書きを作る仕事がある（`.github/workflows/paper.yml`、2026年11月25日）
+- [ ] `Confirmation of review` の言明に、著者が署名している。この段の文は Claude が書いたもので、Claude は代わって署名できない。`paper.md` を変えたコミットはどれも Claude を共著者に持ち、署名の記録は無い（検査が見る）
+- [ ] `paper.md` の `date` が出す日である。いまの `23 November 2026` は下書きの日付で、出す日にその日の日付にする
 
 リポジトリ
 
@@ -70,6 +82,9 @@
 - [ ] 版の番号が、タグの中でも揃っている。`v0.3.0` のタグの中の `CITATION.cff` は `0.2.0` のまま（self-correction の `TL-002`）。次の版で揃える。リリースは作業環境から切れない（タグの push は 403）
 - [x] 試験と CI（`tests/check_tool.py`、`.github/workflows/verify.yml`）
 - [x] 変更履歴（`CHANGELOG.md`）と、手を入れるときの文書（`CONTRIBUTING.md`）
+- [x] 入れ方と依存の一覧（README の「入れる」、`pyproject.toml`）。複製から `pip install ".[pdf]"` で入り、`errata-check` のコマンドが動く（2026年11月25日に確かめた）
+- [x] 手を入れる・不具合を知らせる・助けを求める道筋が、英語でも読める（`CONTRIBUTING.md` の「In English」、2026年11月25日）
+- [x] 保管先の DOI が版ごとの DOI である（2026年11月24日に規程が求めた。README の版の表の DOI は、DataCite の記録でどれも `IsVersionOf` を持つ）
 
 出す日
 
@@ -185,7 +200,7 @@ PyPI へ出す仕事（`.github/workflows/pypi.yml`）は、タグの中でこ�
 pull request は、`main` の第一の親の並びにあるマージと squash のコミットから、番号を拾って数えました（日付は `%cs`）。
 GitHub の API の pull request の一覧とも、2026年11月23日に突き合わせて合いました。
 
-公開は 2026年9月7日で、GitHub の API が返すリポジトリの作成日も同じ日です。
+GitHub の API が返すリポジトリの作成日は 2026年9月7日です。公開に切り替えた日は API から読めません（下の「関門 1 の日付」。2026年11月25日に直しました）。
 2026年10月のコミットは少なく、2026年11月に多く集まっています。関門 4 が見る「反復」は、この分布で読まれます。
 
 ## 原文を読んで直したもの
@@ -323,6 +338,115 @@ GitHub の API の pull request の一覧とも、2026年11月23日に突き合�
 > "Minor utility" packages, including "thin" API clients, and single-function packages are not acceptable.
 
 審査のやり取りでは、言語モデルを使えません。翻訳だけが例外です（下の「言語モデルの関与」）。
+
+## 2026年11月25日に読み直したもの
+
+`openjournals/joss` の `docs/` を、コミット `50d7440b4016aea5bfaa014c8e4d9b342a8dc62e`（2026-11-24）で読みました。
+読んだのは `submitting.md`・`review_criteria.md`・`review_checklist.md`・`policies.md`・`paper.md`・`example_paper.md` です。
+引いた文は、リンクの記法だけを外して写しています。
+
+### 変わったもの
+
+前の読み（`9ab7c7c0494b17caca7e0cf98094d6585ae23abe`）からの差分は、`editing.md`・`editorial_bot.md`・`submitting.md` にあります。
+どれも、保管先の DOI を、査読した版の DOI にするという一文です。`submitting.md` は次のとおりです。
+
+> Upon successful completion of the review, authors will make a tagged release of the software, and deposit a copy of the repository with a data-archiving service such as Zenodo or figshare, get a DOI for the archive of the software associated with that specific tag, and update the review issue thread with the version number and DOI.
+
+README の版の表の DOI は、DataCite の記録でどれも `IsVersionOf` を持ちます。版ごとの DOI であり、全版をまとめる DOI ではありません。
+査読のあとに出す版の DOI は、そのとき新しく作られます。タグと Zenodo の版は運営者のアカウントから作られ、作業環境からは作れません。
+
+### 点検表の一行ずつ
+
+`review_checklist.md` の項目を、上から順に当てました。「直したもの」が「なし」の行は、直すものが無かったか、いまは直せない行です。
+
+| 項目 | JOSS の文 | いまの状態と根拠 | いま直せるか | 直したもの |
+| --- | --- | --- | --- | --- |
+| Repository | "Is the source code for this software available at the repository url?" | 公開。GitHub の API は `visibility` に `public` を返す | 直すものが無い | なし |
+| License | "Does the repository contain a plain-text LICENSE file with the contents of an OSI approved software license?" | `LICENSE` は MIT の全文。GitHub の API は `spdx_id` に `MIT` を返す | 直すものが無い | なし |
+| Contribution and authorship | "Has the submitting author made major contributions to the software? Does the full list of paper authors seem appropriate and complete?" | 著者は一人。マージを除くコミットのほとんどに Claude が共著者として載る（上の「関門の数」） | 直せない。公開した履歴は書き換えない | なし |
+| Scope and significance | "Does this submission demonstrate clear research impact or credible scholarly significance as described in the JOSS guidelines?" | 使っているのは著者自身のリポジトリ（README の「使われている場所」）だけ | 直せない。外の利用は作れない | なし |
+| Development timeline | "Does the project show evidence of sustained development over time (preferably months or years) rather than rapid, recent code generation?" | 最初のコミットは 2026-09-07。コミットは 2026年9月と 2026年11月に集まる | 直せない。時間が要る | なし |
+| Open development | "For projects with recent public repositories, is there at least six months of public development history with evidence of releases, public issues/pull requests, and ideally external engagement?" | タグは `v0.1.0`・`v0.2.0`・`v0.3.0`。pull request はある。issue は少ない。外の関与は無い | 期間は日付で満ちる（下の「関門 1 の日付」）。外の関与は直せない | なし |
+| Collaborative effort | "Does the project show evidence of community engagement such as contributions from multiple developers, issues/discussions from external users, or community influence on the development described in the paper?" | 無い | 直せない | なし |
+| Good practices | "Does the project follow good open-source practices (license, documentation, tests and/or verification processes, releases, and clear contribution/support pathways)?" | そろう。ただし助けを求める道筋が書かれておらず、手を入れる文書は日本語だけだった | 直せる | `CONTRIBUTING.md` に「In English」を足した |
+| Installation | "Does installation proceed as outlined in the documentation?" | README に入れ方が無かった。新しい仮想環境で `pip install ".[pdf]"` が通り、`errata-check --version` が `0.3.0` を返した | 直せる | README（日英）に「入れる」を足した |
+| Functionality | "Have the functional claims of the software been confirmed?" | 道具自身の検査と見本が通る。JSON に直した見本の宣言は、Python 3.9 と 3.10 でも通った（手で確かめた。CI が回すのは 3.11・3.12・3.13） | 直すものが無い | なし |
+| Performance | "If there are any performance claims of the software, have they been confirmed? (If there are no claims, please check off this item.)" | 速さを名乗る文は無い | 直すものが無い | なし |
+| A statement of need | "Do the authors clearly state what problems the software is designed to solve and who the target audience is?" | README と `paper.md` にある | 直すものが無い | なし |
+| Installation instructions | "Is there a clearly-stated list of dependencies? Ideally these should be handled with an automated package management solution." | `pyproject.toml` が依存を持つ。README は `pip install pypdf` だけを書いていた | 直せる | 「入れる」に依存と Python の版を書いた |
+| Example usage | "Do the authors include examples of how to use the software (ideally to solve real-world analysis problems)." | `examples/` に見本がある。実際の使用は README の「使われている場所」 | 直すものが無い | なし |
+| Functionality documentation | "Is the core functionality of the software documented to a satisfactory level (e.g., API method documentation)?" | README の「宣言の書き方」。並べた宣言の名を、検査が道具の `KNOWN_TABLES` と突き合わせる | 直すものが無い | なし |
+| Automated tests | "Are there automated tests or manual steps described so that the functionality of the software can be verified?" | `tests/check_tool.py` を CI が回す | 直すものが無い | なし |
+| Community guidelines | "Are there clear guidelines for third parties wishing to 1) Contribute to the software 2) Report issues or problems with the software 3) Seek support" | 1 と 2 は日本語であった。3 の場が書かれていなかった | 直せる | 使い方の質問も issue で受けると書いた。英語の節を足した |
+| Summary | "Has a clear description of the high-level functionality and purpose of the software for a diverse, non-specialist audience been provided?" | ある | 直すものが無い | なし |
+| Statement of need | "Does the paper have a section titled 'Statement of need' that clearly states what problems the software is designed to solve, who the target audience is, and its relation to other work?" | ある | 直すものが無い | なし |
+| State of the field | "If related tools exist, do they provide a clear "build vs. contribute" justification explaining their unique scholarly contribution and why alternatives are insufficient?" | statcheck・GRIM・showyourwork・continuous analysis と比べていた。訂正と撤回の登録とは比べていなかった | 直せる | Crossref の更新の記録と Retraction Watch のデータとの比較を足した |
+| Software design | "Is the content compelling and does it demonstrate meaningful design thinking?" | 取捨の段がある。名乗る数は、検査が見出しの段落と突き合わせる | 直すものが無い | なし |
+| Research impact statement | "Is the evidence presented compelling?" | 著者自身のリポジトリでの使用と、そこで見つかった不備。外の利用は無いと書いてある | 直せない。外の利用は作れない | なし |
+| AI usage disclosure | "Does the paper include an "AI usage disclosure" section that transparently discloses any use of generative AI in the software creation, documentation, or paper authoring?" | ある。人が確かめたという言明は、著者自身が署名するもの | 署名は Claude にはできない | 段の前に、著者自身の言明だと書いた注釈を置いた。検査が見る |
+| Quality of writing | "Is the paper well written (i.e., it does not require editing for structure, language, or writing quality)?" | 決めるのは査読者 | 決めるのはこちらではない | なし |
+| References | "Is the list of references complete, and is everything cited appropriately that should be cited (e.g., papers, datasets, software)? Do references in the text use the proper citation syntax?" | 引用は `[@鍵]` の形。pandoc の citeproc で全部解けた。訂正と撤回の登録を引いていなかった | 直せる | 項目を足した（下の「paper.bib で確かめたもの（2026年11月25日）」） |
+
+論文の手引き（`docs/paper.md`）の決まりも当てました。
+
+| 決まり | JOSS の文 | いまの状態 | 直したもの |
+| --- | --- | --- | --- |
+| 節と順 | "sections for Summary, Statement of need, State of the field, Software design, Research impact statement, AI usage disclosure, Acknowledgements, and References" | 求める節がこの順にある | 順も検査に足した |
+| 語数 | "The paper should be between 750-1750 words." | 検査が数え、範囲に収まる | なし |
+| 組めること | "JOSS uses Pandoc to compile papers from their Markdown form into a PDF." | 組む仕事が無かった | `.github/workflows/paper.yml` を足した（下の「論文の下書きを組む仕事」） |
+| 日付 | "The date must be specified using the following format: `%e %B %Y`" | `23 November 2026`。下書きの日付 | なし。出す日にその日の日付にする |
+
+### 関門 1 の日付
+
+規程の文は次のとおりです。
+
+> The repository must have been public for more than six months prior to submission, with active development spanning that period.
+
+GitHub の API が返すリポジトリの作成の時刻は、2026-09-07T18:34:51Z です。最初のコミットの日も 2026-09-07 です。
+作ったときから公開されていたなら、六か月を超えるのは 2027-03-07T18:34:51Z より後です。日付で数えて最初の日は 2027年3月8日です。
+cpsbvbng26-dotcom の `docs/joss.md` の「門 1 に届く最短」の 2027-03-08 と合います。
+
+公開に切り替えた日は、API からは読めません。リポジトリの出来事の一覧（Events API）が返すのは、2026-10-31 より後の出来事だけです。
+上の「関門の数」は「公開は 2026年9月7日」と書いていました。作成日を公開日と読んでいたので、その文を直しました。
+間接の目印はあります。Zenodo の `v0.1.0` の記録は、DataCite で 2026-09-07T18:56Z に作られ、`IsSupplementTo` に GitHub の `v0.1.0` の頁を持ちます。
+
+出す時期の決めは、Sophaxis のコードと一緒に 2027年5月以降です（2026年11月11日の決め）。日付の点では、関門 1 はその前に満ちます。
+関門 1 の「active development spanning that period」と関門 4 は、日付だけでは満ちません。
+
+### 論文の下書きを組む仕事
+
+論文の手引きは、組めることを確かめるやり方に、GitHub Action と Docker と手元を挙げます。
+GitHub Action（`openjournals/openjournals-draft-action`）の中身は、`docker://openjournals/inara:latest` を走らせるだけです。
+そのリポジトリの `master` は `af22ceb4b8f9eff6b3a13c05747ccc2f573cf2e6` でした（2026年11月25日、`git ls-remote`）。
+アクションをこの値で留めても、`latest` が指す像は動きます。このリポジトリは外のものを動かない値で留めると決めています（`tests/check_hygiene.py` の「固定」）。
+そこでアクションは使わず、同じ像を直に走らせる仕事を `.github/workflows/paper.yml` に置きました。
+像は、Docker Hub の registry が `latest` と `1.3.1` の両方に返した digest（`sha256:a0414b8b72fd8923917ede614d340d98dc7aa3102aabc2e955e9c02a6100fd62`）で留めています。
+`inara` の `v1.3.1` のタグの `Dockerfile` は、`paper.md` を読んで `paper.pdf` を書くと書いています。
+`paper.md`・`paper.bib`・その仕事のファイルが変わるときだけ動き、できた PDF を実行の成果物に置きます。
+この作業環境には Docker の常駐の仕組みが無く、手元では組めませんでした。手元では pandoc（citeproc）で本文を平文に組み、引いた鍵が全部解けることを確かめました。
+法令の点検の記録の八度目の表にも、この仕事の行を足しました。
+2026年11月25日に Claude が決めました。投稿先の組版で組めないことを、出す前に知るためです。
+
+### paper.bib で確かめたもの（2026年11月25日）
+
+| 鍵 | 確かめた先 | 結果 |
+| --- | --- | --- |
+| `nuijten2016` | `api.crossref.org` | 題・誌・巻・号・頁・著者が合う |
+| `brown2017` | `api.crossref.org` | 題・誌・巻・号・頁・著者が合う |
+| `beaulieujones2017` | `api.crossref.org` | 題・誌・巻・号・頁・著者が合う DOI の記録がある。外からの点検がその番号を挙げた。決めごと 1 は利用者から受け取った番号だけを書くと決めているので、DOI の欄には書かず、README と同じ頁の URL のままにした |
+| `luger2022` | `api.crossref.org` の書誌の照会 | showyourwork そのものの DOI は見つからなかった。リポジトリの URL のまま |
+| `crossrefapi` | `api.crossref.org` の撤回の記録 | 更新の記録が、更新された側の `update-to` の欄に入り、その出どころに `publisher` と `retraction-watch` がある |
+| `rwdata` | `gitlab.com/crossref/retraction-watch-data` の README | 次の文がある。データは 2026-11-24 に作られたもの |
+
+> In September 2023, Crossref acquired the Retraction Watch database from the Center of Scientific Integrity and have made it publicly available.
+
+足した項目には DOI がありません。DOI の欄が DOI の形をしていることと、DOI が README にあることは、`tests/check_tool.py` が見ます。
+
+### 確かめなかったもの
+
+- 同僚が試したかどうか。記録が無く、こちらでは作れません。
+- `Confirmation of review` の言明への署名。著者自身の言明で、Claude は代わって署名できません。
+- 論文の PDF が JOSS の組版で組めるかどうか。手元では組めず、`.github/workflows/paper.yml` の実行が見ます。
 
 ## 審査は公開の場で行われる
 
