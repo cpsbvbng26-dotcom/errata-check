@@ -49,10 +49,38 @@ python3 tests/check_tool.py     # 全部通ってから出す。項目数は REA
   版の番号を上げ、README に移行の手順を書く。
 - 範囲。凍結された一次資料と、それを説明する訂正の記録との突き合わせに限る。
   原稿そのものの校正、書誌の整形、剽窃の検出は範囲の外である。
+- 使い方の質問も、同じ issue の場で受ける（2026-11-25 に足した）。
 
 ## ライセンス
 
 MIT。手を入れたぶんも同じ条件で扱われる。
+
+## In English
+
+The sections above, in English (2026-11-25).
+Issues and pull requests are welcome. No approval or payment is asked for reading the sources, opening an issue or proposing a change.
+
+Reporting a problem. Issues go to <https://github.com/cpsbvbng26-dotcom/errata-check/issues>.
+The bug-report form (`.github/ISSUE_TEMPLATE/bug_report.yml`, in Japanese and English) asks for the output as printed, the expected output,
+the steps to reproduce (the command, and the part of `audit.toml` concerned), the version (`--version`) or the commit copied,
+and the environment (the OS, the versions of Python and pypdf, and whether the GitHub Action was used).
+False positives are especially worth reporting. The tool is meant to gate continuous integration, and failing wrongly is worse than not failing.
+
+Proposing a change. Every check of `python3 tests/check_tool.py` passes before a change is proposed.
+A new check comes with a case in `tests/check_tool.py` that breaks a passing state and confirms that exactly that check fails.
+A check that does not fail when broken is looking at nothing.
+No proposal that puts inference into a verdict is accepted: no language model, embedding, similarity score or fuzzy matching.
+Only white space and character forms are normalised, as described under "Whitespace" in the README.
+
+Seeking support. Questions about use go to the same issue tracker.
+The tool is maintained by its author alone (Takuya Nemoto), with no institutional backing.
+A reply to an issue is aimed at within a few days to a week. This is a target, not a promise.
+The declaration format is not changed in a way that breaks existing declarations.
+If it has to be, the version number goes up and the README gives the steps to migrate.
+The scope is the comparison of frozen primary sources with the correction records that describe them.
+Proofreading a manuscript, formatting a bibliography and detecting plagiarism are out of scope.
+
+Licence. MIT. Contributions are taken under the same terms.
 
 ## 突き合わせの受付 / Checked intake
 
