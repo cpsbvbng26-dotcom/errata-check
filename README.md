@@ -54,6 +54,25 @@ python3 errata_check.py examples/minimal/audit.toml
 全部通れば、最後の行が「すべて通りました。」で終わります。
 見本を一か所だけ壊して、落ちるところまで見る手順は [`examples/README.md`](examples/README.md) にあります。
 
+### 入れる
+
+PyPI にはまだ出していません。複製してから `pip` で入れます。
+
+```
+git clone https://github.com/cpsbvbng26-dotcom/errata-check.git
+cd errata-check
+pip install ".[pdf]"    # PDF を読まないなら pip install .
+errata-check --version
+```
+
+入れると `errata-check` のコマンドが使えます。`python3 errata_check.py` と同じものです。
+依存は [`pyproject.toml`](pyproject.toml) に書いてあります。必ず要る依存はありません。
+PDF を一次資料にするときだけ、`pypdf`（3 以降）が要ります。
+入れずに使うこともできます。`errata_check.py` は一つのファイルなので、写せばそのまま走ります。
+
+`pyproject.toml` が求める Python は 3.9 以降です。宣言を TOML で書くときは、Python 3.11 以降が要ります（標準ライブラリの `tomllib`）。
+CI が検査を回しているのは Python 3.11・3.12・3.13 です。
+
 ---
 
 ## 何を見るか
@@ -296,7 +315,7 @@ PDF から取り出した文字列は、改行や空白の入り方が処理系�
 
 監査が一件でも通らなければ、その手順が落ちます。結果の表は、そのままログに出ます。
 
-`@main` は動く的です。タグはまだありません。それまでは commit の SHA で留めると、中身が動きません。
+`@main` は動く的です。`action.yml` を含むタグはまだありません。`v0.3.0` までのタグは、`action.yml` を足す前に切ったものです。それまでは commit の SHA で留めると、中身が動きません。
 
 この Action は、このリポジトリの CI で自分自身に使っています。見本が通ることと、
 件数の宣言をずらした写しが落ちることを、両方とも確かめています。
